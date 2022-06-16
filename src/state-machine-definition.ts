@@ -9,8 +9,8 @@ export class ActivityDefinition {
 export class StateDefinition {
     stateId: string = '';
     description: string = '';
-    EntryActivity: ActivityDefinition | undefined;
-    // public ExitActivity: ActivityDefinition;
+    EntryActivity?: ActivityDefinition;
+    ExitActivity?: ActivityDefinition;
 }
 
 export class StateMachineDefinition {

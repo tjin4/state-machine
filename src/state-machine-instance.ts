@@ -18,14 +18,17 @@ export class StateMachineInstance {
 
     private currentState: IStateContext = new StateContext();
 
-    constructor(stateMachineDef: StateMachineDefinition, activityBroker: ActivityBroker) {
+    constructor(stateMachineDef: StateMachineDefinition, activityBroker: ActivityBroker, instanceId?: string) {
         this.stateMachineDef = stateMachineDef;
         this.activityBroker = activityBroker;
-        this.instanceId = uuid.v4();
-
+        this.instanceId = instanceId || uuid.v4();
     }
 
-    public processEvent(event: IEvent) {
+    public async start(){
+        await this.enterState(this.stateMachineDef.getInitStateId());
+    }
+
+    public async processEvent(event: IEvent) {
         if(this.currentState.stateId === undefined){
             throw new Error(`current state context is not initialized, state-machine-instance: ${this.instanceId}`);
         }
@@ -36,14 +39,22 @@ export class StateMachineInstance {
             return;
         }
 
-        this.enterState(nextStateId, event);
+        await this.enterState(nextStateId, event);
     }
 
-    private enterState(stateId: string, event: IEvent) {
+    private async enterState(stateId: string, event?: IEvent) {
+        if(this.currentState.stateId !== undefined){
+            const stateDef = this.stateMachineDef.getStateDefinition(this.currentState.stateId);
+            if(stateDef.ExitActivity){
+                await this.activityBroker.executeActivity(stateDef.ExitActivity, this.currentState, event);
+            }
+        }
+
         this.currentState.stateId = stateId;
         const stateDef = this.stateMachineDef.getStateDefinition(stateId);
         if(stateDef.EntryActivity){
-            this.activityBroker.executeActivity(stateDef.EntryActivity, this.currentState, event);
+            await this.activityBroker.executeActivity(stateDef.EntryActivity, this.currentState, event);
         }
     }
+
 }
