@@ -14,16 +14,21 @@ export class StateDefinition {
 }
 
 export class StateMachineDefinition {
+    private definitionId?: string;
+    private description?: string;
     private states: { [stateId: string]: StateDefinition } = {};
     private stateTransitionTable: { [stateId: string]: { [eventId: string]: string } } = {};
-    private initStateId: string | undefined;
+    private initStateId?: string;
 
     public load(doc: string) {
         throw new Error('not implemented');        
     }
 
-    public getStateDefinition(stateId: string): StateDefinition {
-        return this.states[stateId];
+    public getDefinitionId(): string {
+        if(!this.definitionId){
+            throw new Error('StateMachineDefinition is not loaded or missing definition id');
+        }
+        return this.definitionId;
     }
 
     public getInitStateId(): string {
@@ -32,6 +37,10 @@ export class StateMachineDefinition {
         }
 
         return this.initStateId;
+    }
+
+    public getStateDefinition(stateId: string): StateDefinition {
+        return this.states[stateId];
     }
 
     public nextStateId(stateId: string, eventId: string): string | undefined {

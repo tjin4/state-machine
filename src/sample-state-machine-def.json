@@ -1,4 +1,6 @@
 {
+    "definitionId": "a-sample-statemachine-definition",
+    "description": "",
     "states": [
         {
             "stateId": "state1",
