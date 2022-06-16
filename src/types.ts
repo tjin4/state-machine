@@ -6,7 +6,7 @@ export interface IEvent {
 
 export interface IStateContext {
 
-    stateId: string;
+    stateId: string | undefined;
     properties: { [key: string]: any };
     
 }

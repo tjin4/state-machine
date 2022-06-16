@@ -12,9 +12,8 @@ export class StateMachineEngine {
 
     }
 
-    findInstance(instanceId: string): StateMachineInstance{
-        let instance: StateMachineInstance;
-        return instance;
+    findInstance(instanceId: string): StateMachineInstance | null{
+        return null;
     }
 
     pauseInstance(instanceId: string) {
@@ -25,7 +24,7 @@ export class StateMachineEngine {
 
     }
 
-    private dispatchEvent(instanceId, string, event: IEvent){
+    private dispatchEvent(instanceId: string, event: IEvent){
         const instance = this.findInstance(instanceId);
         if(instance){
             instance.processEvent(event);
