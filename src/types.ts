@@ -3,11 +3,10 @@ export interface IEvent {
     properties: { [name: string]: any };
 }
 
-
 export enum EXEC_STATUS {
-    RUNNING,
-    PAUSED,
-    STOPPED
+    RUNNING = 'RUNNING',
+    PAUSED = 'PAUSED',
+    STOPPED = 'STOPPED'
 }
 
 export interface IStateContext {
@@ -23,7 +22,7 @@ export interface IStateContext {
     setInstanceId(stateId: string): Promise<void>;
     
     getStateId(): Promise<string | undefined>;
-    setStateId(stateId: string): Promise<void>;
+    setStateId(stateId?: string): Promise<void>;
    
     getExecStatus(): Promise<EXEC_STATUS>;
     setExecStatus(execStatus: EXEC_STATUS): Promise<void>;

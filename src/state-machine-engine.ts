@@ -4,45 +4,45 @@ import { StateMachineInstance } from "./state-machine-instance";
 import { StateContextFactory } from "./StateConextFactory";
 import { ActivityBroker } from "./activity-broker";
 
-
 export class StateMachineEngine {
 
-    async createInstance(stateMachineDefDoc: string, autoStart: boolean): Promise<string> {
+    instances: Record<string, StateMachineInstance> = {};
+
+    async createInstance(stateMachineDefDoc: string, autoStart: boolean): Promise<{ instanceId: string, instance: StateMachineInstance }> {
         const broker = new ActivityBroker();
 
         const def = new StateMachineDefinition();
         def.load(stateMachineDefDoc);
 
-        const {instanceId, context} = await StateContextFactory.createStateContext();
+        const { instanceId, context } = await StateContextFactory.createStateContext();
         const instance = new StateMachineInstance(def, broker, context);
-        if(autoStart){
-            await instance.start();
+        this.instances[instanceId] = instance;
+
+        if (autoStart) {
+            await instance.run();
         }
 
-        return instanceId;
+        return { instanceId, instance };
     }
 
-    destroyInstance(instanceId: string) {
-
+    findInstance(instanceId: string): StateMachineInstance | undefined {
+        return this.instances[instanceId];
     }
 
-    findInstance(instanceId: string): StateMachineInstance | null{
-        return null;
+    async runInstance(instanceId: string) {
+        await this.findInstance(instanceId)?.run();
     }
 
-    pauseInstance(instanceId: string) {
-
+    async pauseInstance(instanceId: string) {
+        await this.findInstance(instanceId)?.pause();
     }
 
-    resumeInstance(instanceId: string) {
-
+    async stopInstance(instanceId: string) {
+        await this.findInstance(instanceId)?.stop();
     }
 
-    private dispatchEvent(instanceId: string, event: IEvent){
-        const instance = this.findInstance(instanceId);
-        if(instance){
-            instance.processEvent(event);
-        }
+    async dispatchEvent(instanceId: string, event: IEvent): Promise<boolean | undefined> {
+        return await this.findInstance(instanceId)?.processEvent(event);
     }
 
 }

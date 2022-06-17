@@ -17,7 +17,10 @@ export class StateMachineInstance {
         this.context = context;
     }
 
-    public async start(){
+    /**
+     * Set the exec_status to 'RUNNING' so it will take events. If current state is undefined, start from the init state.
+     */
+    public async run(){
         const instanceId = await this.context.getInstanceId();
         if( instanceId === undefined){
             throw new Error(`invalid context, instanceId not available`);
@@ -27,15 +30,22 @@ export class StateMachineInstance {
 
         const stateId = await this.context.getStateId();
         if( stateId === undefined){
-            await this.enterState(this.stateMachineDef.getInitStateId());
+            await this.transitToState(this.stateMachineDef.getInitStateId());
         }
     }
 
+    /**
+     * Pause the state machine from taking event, following run will resume from current state.
+     */
     public async pause() {
         await this.context.setExecStatus(EXEC_STATUS.PAUSED);
     }
 
+    /**
+     * Stop the state machine and reset the state to undefined, following run will start from init state
+     */
     public async stop() {
+        await this.transitToState(undefined);
         await this.context.setExecStatus(EXEC_STATUS.STOPPED);
     }
 
@@ -58,28 +68,30 @@ export class StateMachineInstance {
             return false;
         }
 
-        await this.enterState(nextStateId, event);
+        await this.transitToState(nextStateId, event);
         return true;
     }
 
-    private async enterState(stateId: string, event?: IEvent) {
-        const prevStateId = await this.context.getStateId();
+    private async transitToState(stateId?: string, event?: IEvent) {
+        const currStateId = await this.context.getStateId();
 
-        console.log(`${prevStateId} ==> ${stateId}, eventId:${event?.eventId}, instanceId:${this.context.instanceId}`);
+        console.log(`${currStateId} ==> ${stateId} on eventId:${event?.eventId}, (definitionId:${this.stateMachineDef.getDefinitionId()} instanceId:${this.context.instanceId})`);
 
-        //leave previous state
-        if( prevStateId !== undefined){
-            const stateDef = this.stateMachineDef.getStateDefinition(prevStateId);
+        //leave current state
+        if( currStateId !== undefined){
+            const stateDef = this.stateMachineDef.getStateDefinition(currStateId);
             if(stateDef.exitActivity){
                 await this.activityBroker.executeActivity(stateDef.exitActivity, this.context, event);
             }
         }
 
         //enter new state
-        const stateDef = this.stateMachineDef.getStateDefinition(stateId);
         await this.context.setStateId(stateId);
-        if(stateDef.entryActivity){
-            await this.activityBroker.executeActivity(stateDef.entryActivity, this.context, event);
+        if(stateId !== undefined){
+            const stateDef = this.stateMachineDef.getStateDefinition(stateId);
+            if(stateDef.entryActivity){
+                await this.activityBroker.executeActivity(stateDef.entryActivity, this.context, event);
+            }
         }
     }
 

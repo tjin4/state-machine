@@ -33,7 +33,7 @@ export class InMemoryStateContext implements IStateContext {
         return await this.get('stateId');
     }
 
-    async setStateId(stateId: string): Promise<void> {
+    async setStateId(stateId?: string): Promise<void> {
         await this.set('stateId', stateId);
     }
     
