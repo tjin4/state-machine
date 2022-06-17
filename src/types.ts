@@ -5,7 +5,16 @@ export interface IEvent {
 
 
 export interface IStateContext {
-    stateId: string | undefined; //change to stateName?
-    properties: { [key: string]: any };
+    getProperties(): Promise<Record<string, any>>;
+
+    get(key: string): Promise<any>;
+    set(key: string, value: any): Promise<void>;
+
+    getInstanceId(): Promise<string | undefined>;
+    setInstanceId(stateId: string): Promise<void>;
+    
+    getStateId(): Promise<string | undefined>;
+    setStateId(stateId: string): Promise<void>;
+   
 }
 

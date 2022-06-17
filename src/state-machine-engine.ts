@@ -1,9 +1,11 @@
 import { IEvent } from "./types";
+import { StateMachineDefinition } from "./state-machine-definition";
 import { StateMachineInstance } from "./state-machine-instance";
+import { InMemoryStateContext } from "./InMemoryStateContext";
 
 export class StateMachineEngine {
 
-    createInstance(stateMachineDefDoc: string): string {
+    createInstance(stateMachineDefDoc: string, autoStart: boolean): string {
         const instanceId = "";
         return instanceId;
     }
