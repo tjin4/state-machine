@@ -1,6 +1,9 @@
-import { IStateContext } from "./types";
+import { EXEC_STATUS, IStateContext } from "./types";
 
 export class InMemoryStateContext implements IStateContext {
+
+    instanceId?: string | undefined;
+
     private _properties: { [key: string]: any } = {};
 
     async get(key: string): Promise<any> {
@@ -16,10 +19,13 @@ export class InMemoryStateContext implements IStateContext {
     }
 
     async getInstanceId(): Promise<string | undefined> {
-        return await this.get('instanceId');
+        const instanceId = await this.get('instanceId');
+        this.instanceId = instanceId;
+        return instanceId;
     }
 
     async setInstanceId(instanceId: string): Promise<void> {
+        this.instanceId = instanceId;
         await this.set('instanceId', instanceId);
     }
 
@@ -31,4 +37,11 @@ export class InMemoryStateContext implements IStateContext {
         await this.set('stateId', stateId);
     }
     
+    async getExecStatus(): Promise<EXEC_STATUS> {
+        return await this.get('execStatus');
+    }
+
+    async setExecStatus(execStatus: EXEC_STATUS): Promise<void> {
+        await this.set('execStatus', execStatus);
+    }
 }

@@ -4,7 +4,16 @@ export interface IEvent {
 }
 
 
+export enum EXEC_STATUS {
+    RUNNING,
+    PAUSED,
+    STOPPED
+}
+
 export interface IStateContext {
+
+    instanceId?: string; //in-memory cached instanceId, immutable
+
     getProperties(): Promise<Record<string, any>>;
 
     get(key: string): Promise<any>;
@@ -16,5 +25,7 @@ export interface IStateContext {
     getStateId(): Promise<string | undefined>;
     setStateId(stateId: string): Promise<void>;
    
+    getExecStatus(): Promise<EXEC_STATUS>;
+    setExecStatus(execStatus: EXEC_STATUS): Promise<void>;
 }
 

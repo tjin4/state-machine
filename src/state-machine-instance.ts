@@ -1,8 +1,7 @@
-import { IEvent, IStateContext } from "./types";
-import { InMemoryStateContext } from "./InMemoryStateContext";
+import { EXEC_STATUS, IEvent, IStateContext } from "./types";
 import { StateMachineDefinition, StateDefinition, ActivityDefinition } from "./state-machine-definition";
 import { ActivityBroker } from './activity-broker';
-import uuid from 'uuid';
+
 
 export class StateMachineInstance {
 
@@ -10,25 +9,21 @@ export class StateMachineInstance {
 
     private stateMachineDef: StateMachineDefinition;
 
-    public context?: IStateContext;
+    public context: IStateContext;
 
-    constructor(stateMachineDef: StateMachineDefinition, activityBroker: ActivityBroker) {
+    constructor(stateMachineDef: StateMachineDefinition, activityBroker: ActivityBroker, context: IStateContext) {
         this.stateMachineDef = stateMachineDef;
         this.activityBroker = activityBroker;
+        this.context = context;
     }
 
-    public async start(context?: IStateContext){
-        if(context !== undefined){
-            const instanceId = await context.getInstanceId();
-            if( instanceId === undefined){
-                throw new Error(`invalid context`);
-            }
-            this.context = context;
+    public async start(){
+        const instanceId = await this.context.getInstanceId();
+        if( instanceId === undefined){
+            throw new Error(`invalid context, instanceId not available`);
         }
-        else{
-            this.context = new InMemoryStateContext();
-            await this.context.setInstanceId(uuid.v4());
-        }
+
+        await this.context.setExecStatus(EXEC_STATUS.RUNNING);
 
         const stateId = await this.context.getStateId();
         if( stateId === undefined){
@@ -36,9 +31,19 @@ export class StateMachineInstance {
         }
     }
 
+    public async pause() {
+        await this.context.setExecStatus(EXEC_STATUS.PAUSED);
+    }
+
+    public async stop() {
+        await this.context.setExecStatus(EXEC_STATUS.STOPPED);
+    }
+
     public async processEvent(event: IEvent): Promise<boolean> {
-        if(!this.context){
-            throw new Error(`current state context is not initialized`);
+        const execStatus = await this.context.getExecStatus();
+        if(execStatus !== EXEC_STATUS.RUNNING){
+            console.log(`state-machine-instance is not in running status, ignore event`);
+            return false;
         }
 
         const stateId = await this.context.getStateId();
@@ -58,12 +63,11 @@ export class StateMachineInstance {
     }
 
     private async enterState(stateId: string, event?: IEvent) {
-        if(!this.context){
-            throw new Error(`current state context is not initialized`);
-        }
+        const prevStateId = await this.context.getStateId();
+
+        console.log(`${prevStateId} ==> ${stateId}, eventId:${event?.eventId}, instanceId:${this.context.instanceId}`);
 
         //leave previous state
-        const prevStateId = await this.context.getStateId();
         if( prevStateId !== undefined){
             const stateDef = this.stateMachineDef.getStateDefinition(prevStateId);
             if(stateDef.exitActivity){
