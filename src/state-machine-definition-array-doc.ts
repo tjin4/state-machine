@@ -14,64 +14,53 @@ export class StateDefinition {
     exitActivity?: ActivityDefinition;
 }
 
-export interface IStateMachineDefinition {
-    definitionId: string;
-    description?: string;
-    initStateId: string;
-    states: Record<string, StateDefinition>;
-    stateTransitions: Record<string, Record<string, string>>;
-}
-
-/**
- * 
- */
 export class StateMachineDefinition {
-
-    doc?: IStateMachineDefinition;
+    private definitionId?: string;
+    private description?: string;
+    private initStateId?: string;
+    private states: { [stateId: string]: StateDefinition } = {};
+    private stateTransitionTable: { [stateId: string]: { [eventId: string]: string } } = {};
 
     public load(docString: string) {
         const doc = JSON.parse(docString);
         if(!doc){
             throw new Error(`error parsing json doc`);
         }
+        this.definitionId = doc['definitionId'];
+        this.description = doc['description'];
+        this.initStateId = doc['initStateId'];
+        
+        // transform doc.states (State[]) to dictionary (Record<string, State>)
 
-        StateMachineDefinition.validateDoc(doc);
-        this.doc = doc;
+        // transform doc.stateTransitions (array) to dictionary (Record<string, Record<IEvent, string>>)
     }
 
-    public static validateDoc(doc: any){
-        //use json schema validator?
-    }
+    // public stringify() : string{
+    //     return JSON.stringify(this);
+    // }
 
     public getDefinitionId(): string {
-        if(!this.doc){
-            throw new Error('StateMachineDefinition is not loaded');
+        if(!this.definitionId){
+            throw new Error('StateMachineDefinition is not loaded or missing definition id');
         }
-        return this.doc.definitionId;
+        return this.definitionId;
     }
 
     public getInitStateId(): string {
-        if(!this.doc){
+        if(!this.initStateId){
             throw new Error('StateMachineDefinition is not loaded');
         }
 
-        return this.doc.initStateId;
+        return this.initStateId;
     }
 
     public getStateDefinition(stateId: string): StateDefinition {
-        if(!this.doc){
-            throw new Error('StateMachineDefinition is not loaded');
-        }
-        return this.doc.states[stateId];
+        return this.states[stateId];
     }
 
     public nextStateId(stateId: string, eventId: string): string | undefined {
-        if(!this.doc){
-            throw new Error('StateMachineDefinition is not loaded');
-        }
-
         let nextStateId: string | undefined = undefined;
-        const curr = this.doc.stateTransitions[stateId];
+        const curr = this.stateTransitionTable[stateId];
         if (curr) {
             nextStateId = curr[eventId];
         }

@@ -45,15 +45,15 @@ export class StateMachineInstance {
     private async enterState(stateId: string, event?: IEvent) {
         if(this.currentState.stateId !== undefined){
             const stateDef = this.stateMachineDef.getStateDefinition(this.currentState.stateId);
-            if(stateDef.ExitActivity){
-                await this.activityBroker.executeActivity(stateDef.ExitActivity, this.currentState, event);
+            if(stateDef.exitActivity){
+                await this.activityBroker.executeActivity(stateDef.exitActivity, this.currentState, event);
             }
         }
 
         this.currentState.stateId = stateId;
         const stateDef = this.stateMachineDef.getStateDefinition(stateId);
-        if(stateDef.EntryActivity){
-            await this.activityBroker.executeActivity(stateDef.EntryActivity, this.currentState, event);
+        if(stateDef.entryActivity){
+            await this.activityBroker.executeActivity(stateDef.entryActivity, this.currentState, event);
         }
     }
 

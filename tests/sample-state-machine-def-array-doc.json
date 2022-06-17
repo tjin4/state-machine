@@ -1,0 +1,58 @@
+{
+    "$schema": "urn:x-bloomberg-com:app-portal:state-machine-definition-array",
+    "definitionId": "a-sample-statemachine-definition",
+    "description": "",
+    "initStateId": "state1",
+    "states": [
+        {
+            "stateId": "state1",
+            "descption": "listen ib",
+            "entryActition": {
+                "activityId": "123456-1",
+                "name": "listen-ib",
+                "config": {
+                    "room-id": "my room"
+                }
+            }
+        }, 
+        {
+            "stateId": "state2",
+            "descption": "check weather",
+            "entryActition": {
+                "activityId": "123456-2",
+                "name": "http get",
+                "config": {
+                    "url": "https://www.weather.com"
+                }
+            }
+        },
+        {
+            "stateId": "state3",
+            "descption": "check citi bike",
+            "entryActition": {
+                "activityId": "123456-2",
+                "name": "http get",
+                "config": {
+                    "url": "https://www.citi-bike.com"
+                }
+            }
+        }        
+    ],
+    "stateTransitions": [
+        {
+            "sourceStateId": "state1",
+            "event": {
+                "eventId": "event-ask-weather",
+                "properties": {
+                    "source": "weather.com"
+                }
+            }, 
+            "destStateId": "state2"
+        },
+        {
+            "sourceStateId": "state1",
+            "eventId": "event-ask-citi-bike",
+            "destStateId": "state3"
+        }
+    ]
+}

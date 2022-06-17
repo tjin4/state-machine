@@ -1,52 +1,51 @@
 {
+    "$schema": "urn:x-bloomberg-com:app-portal:state-machine-definition-dictionary",
     "definitionId": "a-sample-statemachine-definition",
     "description": "",
-    "states": [
-        {
+    "initStateId": "state1",
+    "states": {
+        "state1": {
             "stateId": "state1",
             "descption": "listen ib",
             "entryActition": {
-                "id": "123456-1",
+                "activityId": "123456-1",
                 "name": "listen-ib",
                 "config": {
                     "room-id": "my room"
                 }
             }
-        }, 
-        {
+        },
+        "state2": {
             "stateId": "state2",
             "descption": "check weather",
             "entryActition": {
-                "id": "123456-2",
+                "activityId": "123456-2",
                 "name": "http get",
                 "config": {
                     "url": "https://www.weather.com"
                 }
             }
         },
-        {
+        "state3": {
             "stateId": "state3",
             "descption": "check citi bike",
             "entryActition": {
-                "id": "123456-2",
+                "activityId": "123456-2",
                 "name": "http get",
                 "config": {
                     "url": "https://www.citi-bike.com"
                 }
             }
-        }        
-    ],
-    "stateTransitions": [
-        {
-            "sourceStateId": "state1",
-            "eventId": "event-ask-weather",
-            "destStateId": "state2"
-        },
-        {
-            "sourceStateId": "state1",
-            "eventId": "event-ask-citi-bike",
-            "destStateId": "state3"
         }
-
-    ]
+    },
+    "stateTransitions": {
+        "state1": {
+            "event1": "state2",
+            "event2": "state3"
+        },
+        "state2": {
+            "event3": "state3",
+            "event1": "state1"
+        }
+    }
 }
