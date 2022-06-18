@@ -1,26 +1,4 @@
-import { IEvent } from "./types";
-
-export class ActivityDefinition {
-    activityId: string = '';
-    name?: string;
-    description?: string;
-    config: {[key:string]: any} = {};
-}
-
-export class StateDefinition {
-    stateId: string = '';
-    description?: string;   
-    entryActivity?: ActivityDefinition;
-    exitActivity?: ActivityDefinition;
-}
-
-export interface IStateMachineDefinition {
-    definitionId: string;
-    description?: string;
-    initStateId: string;
-    states: Record<string, StateDefinition>;
-    stateTransitions: Record<string, Record<string, string>>;
-}
+import { IEvent, IStateMachineDefinition, IStateDefinition } from "./types";
 
 /**
  * 
@@ -58,7 +36,7 @@ export class StateMachineDefinition {
         return this.doc.initStateId;
     }
 
-    public getStateDefinition(stateId: string): StateDefinition {
+    public getStateDefinition(stateId: string): IStateDefinition {
         if(!this.doc){
             throw new Error('StateMachineDefinition is not loaded');
         }

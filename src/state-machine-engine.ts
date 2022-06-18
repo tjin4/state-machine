@@ -6,16 +6,20 @@ import { ActivityBroker } from "./activity-broker";
 
 export class StateMachineEngine {
 
-    instances: Record<string, StateMachineInstance> = {};
+    broker: ActivityBroker;
+    private instances: Record<string, StateMachineInstance> = {};
+
+    constructor() {
+        this.broker = new ActivityBroker();
+    }
 
     async createInstance(stateMachineDefDoc: string, autoStart: boolean): Promise<{ instanceId: string, instance: StateMachineInstance }> {
-        const broker = new ActivityBroker();
 
         const def = new StateMachineDefinition();
         def.load(stateMachineDefDoc);
 
         const { instanceId, context } = await StateContextFactory.createStateContext();
-        const instance = new StateMachineInstance(def, broker, context);
+        const instance = new StateMachineInstance(def, this.broker, context);
         this.instances[instanceId] = instance;
 
         if (autoStart) {
