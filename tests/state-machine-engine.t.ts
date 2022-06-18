@@ -1,14 +1,19 @@
 import { StateMachineEngine } from '../src/state-machine-engine';
+import { ActivityReturnEvent } from './activity-return-event';
 import { readFileSync } from 'fs';
 import path from 'path';
 
 test('StateMachineEngine.createInstance', async () => {
+
+
     const doc = readFileSync(path.join(__dirname, 'sample-state-machine-def-dict-doc.json')).toString();
 
     const engine = new StateMachineEngine();
+    engine.broker.register(new ActivityReturnEvent());
+
     const { instanceId, instance } = await engine.createInstance(doc, true);
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 1; i++) {
         await engine.runInstance(instanceId);
         await engine.dispatchEvent(instanceId, { eventId: 'event1', properties: {} });
         await engine.dispatchEvent(instanceId, { eventId: 'event3', properties: {} });

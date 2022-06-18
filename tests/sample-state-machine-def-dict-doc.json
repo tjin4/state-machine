@@ -7,7 +7,7 @@
         "state1": {
             "stateId": "state1",
             "descption": "listen ib",
-            "entryActition": {
+            "entryActivity": {
                 "activityId": "123456-1",
                 "name": "listen-ib",
                 "config": {
@@ -17,19 +17,24 @@
         },
         "state2": {
             "stateId": "state2",
-            "descption": "check weather",
-            "entryActition": {
-                "activityId": "123456-2",
-                "name": "http get",
+            "descption": "a transient state",
+            "entryActivity": {
+                "activityId": "activity-return-event",
+                "name": "return event2",
                 "config": {
-                    "url": "https://www.weather.com"
+                    "event": {
+                        "eventId": "event-from-entry-activity",
+                        "properties": {
+                            "info": "test for transient state"
+                        }
+                    }
                 }
             }
         },
         "state3": {
             "stateId": "state3",
             "descption": "check citi bike",
-            "entryActition": {
+            "entryActivity": {
                 "activityId": "123456-2",
                 "name": "http get",
                 "config": {
@@ -45,7 +50,8 @@
         },
         "state2": {
             "event3": "state3",
-            "event1": "state1"
+            "event1": "state1",
+            "event-from-entry-activity": "state3"
         }
     }
 }

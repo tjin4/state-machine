@@ -28,3 +28,29 @@ export interface IStateContext {
     setExecStatus(execStatus: EXEC_STATUS): Promise<void>;
 }
 
+export interface IActivityDefinition {
+    activityId: string;
+    name?: string;
+    description?: string;
+    config?: {[key:string]: any};
+}
+
+export interface IStateDefinition {
+    stateId: string;
+    description?: string;   
+    entryActivity?: IActivityDefinition;
+    exitActivity?: IActivityDefinition;
+}
+
+export interface IStateMachineDefinition {
+    definitionId: string;
+    description?: string;
+    initStateId: string;
+    states: Record<string, IStateDefinition>;
+    stateTransitions: Record<string, Record<string, string>>;
+}
+
+export interface IActivity {
+    activityId: string;
+    execute (activityDef: IActivityDefinition, stateContext: IStateContext, event?: IEvent): Promise<IEvent | undefined>;
+}
