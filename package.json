@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build": "npx tsc",
-    "test": "npx jest"
+    "test": "npx jest",
+    "start-postgres": "docker run --pull missing --name postgres-1 -p 127.0.0.1:5430:5432 -e POSTGRES_PASSWORD=postgres -d postgres",
+    "stop-postgres": "docker stop postgres-1"
   },
   "author": "",
   "license": "ISC",
