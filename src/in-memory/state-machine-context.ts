@@ -1,6 +1,6 @@
-import { EXEC_STATUS, IContext, IStateContext, IStateMachineContext } from "./types";
-import { InMemoryContext } from "./inmemory-context";
-import { InMemoryStateContext } from "./inmemory-state-context";
+import { EXEC_STATUS, IContext, IStateContext, IStateMachineContext } from "../types";
+import { InMemoryContext } from "./context";
+import { InMemoryStateContext } from "./state-context";
 import { v4 as uuidv4 } from 'uuid';
 
 export class InMemoryStateMachineContext extends InMemoryContext implements IStateMachineContext {

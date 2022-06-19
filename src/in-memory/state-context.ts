@@ -1,5 +1,5 @@
-import { IStateContext } from "./types";
-import { InMemoryContext } from "./inmemory-context";
+import { IStateContext } from "../types";
+import { InMemoryContext } from "./context";
 import { v4 as uuidv4 } from 'uuid';
 
 export class InMemoryStateContext extends InMemoryContext implements IStateContext {

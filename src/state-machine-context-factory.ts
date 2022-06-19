@@ -1,5 +1,5 @@
 import { IStateMachineContext } from "./types";
-import { InMemoryStateMachineContext } from "./inmemory-state-machine-context";
+import { InMemoryStateMachineContext } from "./in-memory/state-machine-context";
 
 export class StateMachineContextFactory {
 
