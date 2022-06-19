@@ -1,4 +1,4 @@
-import { EXEC_STATUS, IEvent, IStateContext } from "./types";
+import { EXEC_STATUS, IEvent, IStateMachineContext } from "./types";
 import { StateMachineDefinition } from "./state-machine-definition";
 import { ActivityBroker } from './activity-broker';
 
@@ -8,9 +8,9 @@ export class StateMachine {
 
     private stateMachineDef: StateMachineDefinition;
 
-    public context: IStateContext;
+    public context: IStateMachineContext;
 
-    constructor(stateMachineDef: StateMachineDefinition, activityBroker: ActivityBroker, context: IStateContext) {
+    constructor(stateMachineDef: StateMachineDefinition, activityBroker: ActivityBroker, context: IStateMachineContext) {
         this.stateMachineDef = stateMachineDef;
         this.activityBroker = activityBroker;
         this.context = context;

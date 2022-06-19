@@ -9,7 +9,7 @@ export enum EXEC_STATUS {
     STOPPED = 'STOPPED'
 }
 
-export interface IStateContext {
+export interface IStateMachineContext {
 
     instanceId?: string; //in-memory cached instanceId, immutable
 
@@ -52,5 +52,5 @@ export interface IStateMachineDefinition {
 
 export interface IActivity {
     activityId: string;
-    execute (activityDef: IActivityDefinition, stateContext: IStateContext, event?: IEvent): Promise<IEvent | undefined>;
+    execute (activityDef: IActivityDefinition, stateContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined>;
 }

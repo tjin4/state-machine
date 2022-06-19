@@ -1,6 +1,6 @@
-import { EXEC_STATUS, IStateContext } from "./types";
+import { EXEC_STATUS, IStateMachineContext } from "./types";
 
-export class InMemoryStateContext implements IStateContext {
+export class InMemoryStateMachineContext implements IStateMachineContext {
 
     instanceId?: string | undefined;
 
