@@ -5,9 +5,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 export class InMemoryStateMachineContext extends InMemoryContext implements IStateMachineContext {
 
+    readonly stateMachineDefId: string;
+
     private _stateId?: string;
-    stateMachineDefId: string;
-    stateContext?: IStateContext;
+    private stateContext?: IStateContext;
 
     protected constructor(stateMachineDefId: string, contextId: string) {
         super(contextId);

@@ -10,7 +10,7 @@ export enum EXEC_STATUS {
 }
 
 export interface IContext {
-    contextId: string;
+    readonly contextId: string;
 
     getProperties(): Promise<Record<string, any>>;
 
@@ -24,14 +24,17 @@ export interface IContext {
  * Represent a context local to the current state
  */
 export interface IStateContext extends IContext {
-
+    readonly stateMachineContextId: string;
+    readonly stateId: string;
 }
 
 /**
  * Represent a context of the current state machine instance, accessible to all states
  */
 export interface IStateMachineContext extends IContext{
-   
+    
+    readonly stateMachineDefId: string;
+
     stateId(): string | undefined; //cached stateId
     getStateId(): Promise<string | undefined>;
     setStateId(stateId?: string): Promise<void>;
