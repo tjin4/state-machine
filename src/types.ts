@@ -9,23 +9,34 @@ export enum EXEC_STATUS {
     STOPPED = 'STOPPED'
 }
 
-export interface IStateMachineContext {
-
-    instanceId?: string; //in-memory cached instanceId, immutable
+export interface IContext {
+    contextId: string;
 
     getProperties(): Promise<Record<string, any>>;
 
     get(key: string): Promise<any>;
-    set(key: string, value: any): Promise<void>;
+    set(key: string, value: any): Promise<void>;   
+}
 
-    getInstanceId(): Promise<string | undefined>;
-    setInstanceId(stateId: string): Promise<void>;
-    
+/**
+ * Represent a context local to the current state
+ */
+export interface IStateContext extends IContext {
+
+}
+
+/**
+ * Represent a context of the current state machine instance, accessible to all states
+ */
+export interface IStateMachineContext extends IContext{
+   
     getStateId(): Promise<string | undefined>;
     setStateId(stateId?: string): Promise<void>;
    
     getExecStatus(): Promise<EXEC_STATUS>;
     setExecStatus(execStatus: EXEC_STATUS): Promise<void>;
+
+    currentStateContext() : Promise<IContext>;
 }
 
 export interface IActivityDefinition {

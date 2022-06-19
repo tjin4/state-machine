@@ -18,15 +18,15 @@ export class StateMachineEngine {
         const def = new StateMachineDefinition();
         def.load(stateMachineDefDoc);
 
-        const { instanceId, context } = await StateContextFactory.createStateContext();
+        const context = await StateContextFactory.createStateMachineContext();
         const instance = new StateMachine(def, this.broker, context);
-        this.instances[instanceId] = instance;
+        this.instances[context.contextId] = instance;
 
         if (autoStart) {
             await instance.run();
         }
 
-        return { instanceId, instance };
+        return {instanceId:context.contextId, instance};
     }
 
     findInstance(instanceId: string): StateMachine | undefined {

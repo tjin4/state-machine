@@ -20,7 +20,7 @@ export class StateMachine {
      * Set the exec_status to 'RUNNING' so it will take events. If current state is undefined, start from the init state.
      */
     public async run() {
-        const instanceId = await this.context.getInstanceId();
+        const instanceId = await this.context.contextId;
         if (instanceId === undefined) {
             throw new Error(`invalid context, instanceId not available`);
         }
@@ -77,7 +77,7 @@ export class StateMachine {
     private async transitToState(stateId?: string, event?: IEvent): Promise<IEvent | undefined> {
         const currStateId = await this.context.getStateId();
 
-        console.log(`${currStateId} ==> ${stateId} on eventId:${event?.eventId}, (definitionId:${this.stateMachineDef.getDefinitionId()} instanceId:${this.context.instanceId})`);
+        console.log(`${currStateId} ==> ${stateId} on eventId:${event?.eventId}, (definitionId:${this.stateMachineDef.getDefinitionId()} instanceId:${this.context.contextId})`);
 
         //leave current state
         if (currStateId !== undefined) {

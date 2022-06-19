@@ -1,32 +1,24 @@
-import { EXEC_STATUS, IStateMachineContext } from "./types";
+import { EXEC_STATUS, IContext, IStateMachineContext } from "./types";
+import { InMemoryContext } from "./inmemory-context";
+import { v4 as uuidv4 } from 'uuid';
 
-export class InMemoryStateMachineContext implements IStateMachineContext {
+export class InMemoryStateMachineContext extends InMemoryContext implements IStateMachineContext {
 
-    instanceId?: string | undefined;
-
-    private _properties: { [key: string]: any } = {};
-
-    async get(key: string): Promise<any> {
-        return this._properties[key];
+    constructor(contextId: string) {
+        super(contextId);
     }
 
-    async set(key: string, value: any): Promise<void> {
-        this._properties[key] = value;
-    }
-    
-    async getProperties(): Promise<Record<string, any>> {
-        return this._properties;
-    }
-
-    async getInstanceId(): Promise<string | undefined> {
-        const instanceId = await this.get('instanceId');
-        this.instanceId = instanceId;
-        return instanceId;
+    static async create(contextId?: string): Promise<IStateMachineContext> {
+        if (contextId === undefined) {
+            contextId = uuidv4();
+        }
+        const context = new InMemoryStateMachineContext(contextId);
+        await context.set('contextId', contextId);
+        return context;
     }
 
-    async setInstanceId(instanceId: string): Promise<void> {
-        this.instanceId = instanceId;
-        await this.set('instanceId', instanceId);
+    static async load(instanceId: string): Promise<IStateMachineContext> {
+        throw new Error('Not implemented');
     }
 
     async getStateId(): Promise<string | undefined> {
@@ -36,12 +28,16 @@ export class InMemoryStateMachineContext implements IStateMachineContext {
     async setStateId(stateId?: string): Promise<void> {
         await this.set('stateId', stateId);
     }
-    
+
     async getExecStatus(): Promise<EXEC_STATUS> {
         return await this.get('execStatus');
     }
 
     async setExecStatus(execStatus: EXEC_STATUS): Promise<void> {
         await this.set('execStatus', execStatus);
+    }
+
+    currentStateContext(): Promise<IContext> {
+        throw new Error("Method not implemented.");
     }
 }
