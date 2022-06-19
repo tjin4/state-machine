@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export class InMemoryStateMachineContext extends InMemoryContext implements IStateMachineContext {
 
+    private _stateId?: string;
     stateMachineDefId: string;
     stateContext?: IStateContext;
 
@@ -25,15 +26,20 @@ export class InMemoryStateMachineContext extends InMemoryContext implements ISta
         throw new Error('Not implemented');
     }
 
+    stateId(): string | undefined {
+        return this._stateId;
+    }
+
     async getStateId(): Promise<string | undefined> {
         return await this.get('stateId');
     }
 
     async setStateId(stateId?: string): Promise<void> {
         const currStateId = await this.getStateId();
-        if(currStateId === stateId){
+        if (currStateId === stateId) {
             return;
         }
+        this._stateId = stateId;
         await this.set('stateId', stateId);
         await this.setStateContext(stateId);
     }

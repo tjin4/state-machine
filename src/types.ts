@@ -32,6 +32,7 @@ export interface IStateContext extends IContext {
  */
 export interface IStateMachineContext extends IContext{
    
+    stateId(): string | undefined; //cached stateId
     getStateId(): Promise<string | undefined>;
     setStateId(stateId?: string): Promise<void>;
    
