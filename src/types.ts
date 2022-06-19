@@ -16,6 +16,8 @@ export interface IContext {
 
     get(key: string): Promise<any>;
     set(key: string, value: any): Promise<void>;   
+
+    destroy(): Promise<void>;
 }
 
 /**
@@ -36,7 +38,7 @@ export interface IStateMachineContext extends IContext{
     getExecStatus(): Promise<EXEC_STATUS>;
     setExecStatus(execStatus: EXEC_STATUS): Promise<void>;
 
-    currentStateContext() : Promise<IContext>;
+    currentStateContext() : Promise<IContext | undefined>;
 }
 
 export interface IActivityDefinition {

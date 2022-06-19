@@ -4,13 +4,13 @@ import { v4 as uuidv4 } from 'uuid';
 export class InMemoryContext implements IContext {
 
     readonly contextId: string;
-    private _properties: { [key: string]: any } = {};
+    protected _properties: { [key: string]: any } = {};
 
-    constructor(contextId: string){
+    protected constructor(contextId: string){
         this.contextId = contextId;
     }
 
-    static async create(contextId?: string): Promise<IContext> {
+    static async createContext(contextId?: string): Promise<IContext> {
         if(contextId === undefined){
             contextId = uuidv4();
         }
@@ -35,4 +35,7 @@ export class InMemoryContext implements IContext {
         return this._properties;
     }
     
+    async destroy(): Promise<void> {
+        
+    }
 }
