@@ -1,25 +1,25 @@
 import { IEvent } from "./types";
 import { StateMachineDefinition } from "./state-machine-definition";
-import { StateMachineInstance } from "./state-machine-instance";
+import { StateMachine } from "./state-machine";
 import { StateContextFactory } from "./StateConextFactory";
 import { ActivityBroker } from "./activity-broker";
 
 export class StateMachineEngine {
 
     broker: ActivityBroker;
-    private instances: Record<string, StateMachineInstance> = {};
+    private instances: Record<string, StateMachine> = {};
 
     constructor() {
         this.broker = new ActivityBroker();
     }
 
-    async createInstance(stateMachineDefDoc: string, autoStart: boolean): Promise<{ instanceId: string, instance: StateMachineInstance }> {
+    async createInstance(stateMachineDefDoc: string, autoStart: boolean): Promise<{ instanceId: string, instance: StateMachine }> {
 
         const def = new StateMachineDefinition();
         def.load(stateMachineDefDoc);
 
         const { instanceId, context } = await StateContextFactory.createStateContext();
-        const instance = new StateMachineInstance(def, this.broker, context);
+        const instance = new StateMachine(def, this.broker, context);
         this.instances[instanceId] = instance;
 
         if (autoStart) {
@@ -29,7 +29,7 @@ export class StateMachineEngine {
         return { instanceId, instance };
     }
 
-    findInstance(instanceId: string): StateMachineInstance | undefined {
+    findInstance(instanceId: string): StateMachine | undefined {
         return this.instances[instanceId];
     }
 

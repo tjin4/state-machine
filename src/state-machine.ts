@@ -2,7 +2,7 @@ import { EXEC_STATUS, IEvent, IStateContext } from "./types";
 import { StateMachineDefinition } from "./state-machine-definition";
 import { ActivityBroker } from './activity-broker';
 
-export class StateMachineInstance {
+export class StateMachine {
 
     private activityBroker: ActivityBroker;
 
