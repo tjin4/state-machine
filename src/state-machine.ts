@@ -8,7 +8,7 @@ export class StateMachine {
 
     private stateMachineDef: StateMachineDefinition;
 
-    public context: IStateMachineContext;
+    public readonly context: IStateMachineContext;
 
     constructor(stateMachineDef: StateMachineDefinition, activityBroker: ActivityBroker, context: IStateMachineContext) {
         this.stateMachineDef = stateMachineDef;
