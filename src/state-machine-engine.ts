@@ -48,8 +48,8 @@ export class StateMachineEngine {
         await this.findStateMachine(contextId)?.stop();
     }
 
-    async dispatchEvent(contextId: string, event: IEvent): Promise<boolean | undefined> {
-        return await this.findStateMachine(contextId)?.processEvent(event);
+    async dispatchEvent(event: IEvent): Promise<boolean | undefined> {
+        return await this.findStateMachine(event.stateMachineId)?.processEvent(event);
     }
 
 }

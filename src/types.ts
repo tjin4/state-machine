@@ -1,5 +1,6 @@
 export interface IEvent {
     eventId: string; //event type/name, change to eventName or eventType?
+    stateMachineId: string;
     properties: { [name: string]: any };
 }
 

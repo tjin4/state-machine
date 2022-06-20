@@ -15,8 +15,8 @@ test('StateMachineEngine.run', async () => {
 
     for (let i = 0; i < 1; i++) {
         await engine.runStateMachine(stateMachine.context.contextId);
-        await engine.dispatchEvent(stateMachine.context.contextId, { eventId: 'event1', properties: {} });
-        await engine.dispatchEvent(stateMachine.context.contextId, { eventId: 'event3', properties: {} });
+        await engine.dispatchEvent({ eventId: 'event1', stateMachineId:stateMachine.context.contextId, properties: {} });
+        await engine.dispatchEvent({ eventId: 'event3', stateMachineId:stateMachine.context.contextId, properties: {} });
         await engine.stopStateMachine(stateMachine.context.contextId);
         console.log(JSON.stringify(stateMachine.context, null, 2));
     }
