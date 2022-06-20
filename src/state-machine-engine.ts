@@ -1,52 +1,55 @@
 import { IEvent } from "./types";
 import { StateMachineDefinition } from "./state-machine-definition";
-import { StateMachineInstance } from "./state-machine-instance";
-import { StateContextFactory } from "./StateConextFactory";
+import { StateMachine } from "./state-machine";
+import { StateMachineContextFactory } from "./state-machine-context-factory";
 import { ActivityBroker } from "./activity-broker";
 
 export class StateMachineEngine {
 
     broker: ActivityBroker;
-    private instances: Record<string, StateMachineInstance> = {};
+    private stateMachines: Record<string, StateMachine> = {};
 
     constructor() {
         this.broker = new ActivityBroker();
     }
 
-    async createInstance(stateMachineDefDoc: string, autoStart: boolean): Promise<{ instanceId: string, instance: StateMachineInstance }> {
+    async createStateMachine(stateMachineDefDoc: string, autoStart: boolean): Promise<StateMachine> {
 
         const def = new StateMachineDefinition();
         def.load(stateMachineDefDoc);
-
-        const { instanceId, context } = await StateContextFactory.createStateContext();
-        const instance = new StateMachineInstance(def, this.broker, context);
-        this.instances[instanceId] = instance;
-
-        if (autoStart) {
-            await instance.run();
+        if(!def.doc){
+            throw new Error('StateMachineDefinition is invalid');
         }
 
-        return { instanceId, instance };
+        const context = await StateMachineContextFactory.createStateMachineContext(def.doc.definitionId);
+        const stateMachine = new StateMachine(def, this.broker, context);
+        this.stateMachines[context.contextId] = stateMachine;
+
+        if (autoStart) {
+            await stateMachine.run();
+        }
+
+        return stateMachine;
     }
 
-    findInstance(instanceId: string): StateMachineInstance | undefined {
-        return this.instances[instanceId];
+    findStateMachine(contextId: string): StateMachine | undefined {
+        return this.stateMachines[contextId];
     }
 
-    async runInstance(instanceId: string) {
-        await this.findInstance(instanceId)?.run();
+    async runStateMachine(contextId: string) {
+        await this.findStateMachine(contextId)?.run();
     }
 
-    async pauseInstance(instanceId: string) {
-        await this.findInstance(instanceId)?.pause();
+    async pauseStateMachine(contextId: string) {
+        await this.findStateMachine(contextId)?.pause();
     }
 
-    async stopInstance(instanceId: string) {
-        await this.findInstance(instanceId)?.stop();
+    async stopStateMachine(contextId: string) {
+        await this.findStateMachine(contextId)?.stop();
     }
 
-    async dispatchEvent(instanceId: string, event: IEvent): Promise<boolean | undefined> {
-        return await this.findInstance(instanceId)?.processEvent(event);
+    async dispatchEvent(contextId: string, event: IEvent): Promise<boolean | undefined> {
+        return await this.findStateMachine(contextId)?.processEvent(event);
     }
 
 }

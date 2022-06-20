@@ -1,16 +1,16 @@
-import { EXEC_STATUS, IEvent, IStateContext } from "./types";
+import { EXEC_STATUS, IEvent, IStateMachineContext } from "./types";
 import { StateMachineDefinition } from "./state-machine-definition";
 import { ActivityBroker } from './activity-broker';
 
-export class StateMachineInstance {
+export class StateMachine {
 
     private activityBroker: ActivityBroker;
 
     private stateMachineDef: StateMachineDefinition;
 
-    public context: IStateContext;
+    public readonly context: IStateMachineContext;
 
-    constructor(stateMachineDef: StateMachineDefinition, activityBroker: ActivityBroker, context: IStateContext) {
+    constructor(stateMachineDef: StateMachineDefinition, activityBroker: ActivityBroker, context: IStateMachineContext) {
         this.stateMachineDef = stateMachineDef;
         this.activityBroker = activityBroker;
         this.context = context;
@@ -20,7 +20,7 @@ export class StateMachineInstance {
      * Set the exec_status to 'RUNNING' so it will take events. If current state is undefined, start from the init state.
      */
     public async run() {
-        const instanceId = await this.context.getInstanceId();
+        const instanceId = await this.context.contextId;
         if (instanceId === undefined) {
             throw new Error(`invalid context, instanceId not available`);
         }
@@ -77,7 +77,7 @@ export class StateMachineInstance {
     private async transitToState(stateId?: string, event?: IEvent): Promise<IEvent | undefined> {
         const currStateId = await this.context.getStateId();
 
-        console.log(`${currStateId} ==> ${stateId} on eventId:${event?.eventId}, (definitionId:${this.stateMachineDef.getDefinitionId()} instanceId:${this.context.instanceId})`);
+        console.log(`${currStateId} ==> ${stateId} on eventId:${event?.eventId}, (definitionId:${this.stateMachineDef.getDefinitionId()} instanceId:${this.context.contextId})`);
 
         //leave current state
         if (currStateId !== undefined) {
@@ -96,5 +96,4 @@ export class StateMachineInstance {
             }
         }
     }
-
 }

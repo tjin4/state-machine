@@ -1,4 +1,4 @@
-import { IEvent, IStateContext, IActivityDefinition, IActivity } from "./types";
+import { IEvent, IStateMachineContext, IActivityDefinition, IActivity } from "./types";
 
 export class ActivityBroker {
 
@@ -14,7 +14,7 @@ export class ActivityBroker {
      * @param stateContext 
      * @param event 
      */
-    async executeActivity(activityDef: IActivityDefinition, stateContext: IStateContext, event?: IEvent): Promise<IEvent | undefined> {
+    async executeActivity(activityDef: IActivityDefinition, stateContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined> {
         
         const activity = this.activities[activityDef.activityId];
         if(activity !== undefined){
