@@ -36,14 +36,19 @@ export interface IStateMachineContext extends IContext{
     
     readonly stateMachineDefId: string;
 
-    stateId(): string | undefined; //cached stateId
+    /**
+     * synchrously return cached stateId, this is not exposed as property because it needs 
+     * to set internally, but readonly for external
+     */
+    stateId(): string | undefined; 
+
     getStateId(): Promise<string | undefined>;
     setStateId(stateId?: string): Promise<void>;
    
     getExecStatus(): Promise<EXEC_STATUS>;
     setExecStatus(execStatus: EXEC_STATUS): Promise<void>;
 
-    currentStateContext() : Promise<IContext | undefined>;
+    currentStateContext() : Promise<IStateContext | undefined>;
 }
 
 export interface IActivityDefinition {
@@ -68,7 +73,14 @@ export interface IStateMachineDefinition {
     stateTransitions: Record<string, Record<string, string>>;
 }
 
-export interface IActivity {
-    activityId: string;
-    execute (activityDef: IActivityDefinition, stateContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined>;
+export interface IActivityProvider {
+    readonly supportedActivities : string[];
+    executeActivity(activityDef: IActivityDefinition, stateContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined>;
+}
+
+export interface IActivityBroker {
+    
+    register(provider: IActivityProvider): Promise<boolean> ;
+
+    executeActivity(activityDef: IActivityDefinition, stateContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined>;
 }

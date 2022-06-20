@@ -1,5 +1,5 @@
 import { StateMachineEngine } from '../src/state-machine-engine';
-import { ActivityReturnEvent } from './activity-return-event';
+import { TestActivityProvider } from './test-activity-providert';
 import { readFileSync } from 'fs';
 import path from 'path';
 
@@ -9,7 +9,7 @@ test('StateMachineEngine.run', async () => {
     const doc = readFileSync(path.join(__dirname, 'sample-state-machine-def-dict-doc.json')).toString();
 
     const engine = new StateMachineEngine();
-    engine.broker.register(new ActivityReturnEvent());
+    engine.broker.register(new TestActivityProvider());
 
     const stateMachine = await engine.createStateMachine(doc, true);
 

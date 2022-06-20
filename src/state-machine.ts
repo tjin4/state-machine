@@ -63,7 +63,7 @@ export class StateMachine {
         const nextStateId = this.stateMachineDef.nextStateId(stateId, event.eventId);
 
         if (nextStateId === undefined) {
-            console.log(`no state transition path defined, event ignored`);
+            console.log(`no state transition path defined, event ignored, eventId=${event.eventId}`);
             return false;
         }
 

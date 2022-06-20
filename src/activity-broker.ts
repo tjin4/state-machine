@@ -1,28 +1,31 @@
-import { IEvent, IStateMachineContext, IActivityDefinition, IActivity } from "./types";
+import { IEvent, IStateMachineContext, IActivityDefinition, IActivityProvider, IActivityBroker } from "./types";
 
-export class ActivityBroker {
+export class ActivityBroker implements IActivityBroker {
 
-    private activities: Record<string, IActivity> = {};
+    private activitieProviders: Record<string, IActivityProvider> = {};
 
-    register(activity: IActivity){
-        this.activities[activity.activityId] = activity;
+    async register(activityProvider: IActivityProvider): Promise<boolean> {
+        activityProvider.supportedActivities.forEach(activityId => {
+            this.activitieProviders[activityId] = activityProvider;
+        });
+        return true;
     }
 
     /**
-     * If entry activity returns a IEvent, then will be used to drive to next state
+     * If entry activity returns a IEvent, it will be used to drive to next state
      * @param activityDef 
      * @param stateContext 
      * @param event 
      */
     async executeActivity(activityDef: IActivityDefinition, stateContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined> {
-        
-        const activity = this.activities[activityDef.activityId];
-        if(activity !== undefined){
+
+        const activityProvider = this.activitieProviders[activityDef.activityId];
+        if (activityProvider !== undefined) {
             console.log(`executing activity - ${JSON.stringify(activityDef)}`);
-            return await activity.execute(activityDef, stateContext, event);
+            return await activityProvider.executeActivity(activityDef, stateContext, event);
         }
-        else{
-            console.log(`activity not found - ${activityDef.activityId}`);
+        else {
+            console.log(`no activity provider registered for '${activityDef.activityId}'`);
         }
     }
 }

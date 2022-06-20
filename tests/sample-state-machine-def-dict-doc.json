@@ -19,7 +19,7 @@
             "stateId": "state2",
             "descption": "a transient state",
             "entryActivity": {
-                "activityId": "activity-return-event",
+                "activityId": "test-activity:return-event",
                 "name": "return event2",
                 "config": {
                     "event": {
@@ -49,9 +49,11 @@
             "event2": "state3"
         },
         "state2": {
-            "event3": "state3",
             "event1": "state1",
             "event-from-entry-activity": "state3"
+        },
+        "state3": {
+            "event3": "state1"
         }
     }
 }
