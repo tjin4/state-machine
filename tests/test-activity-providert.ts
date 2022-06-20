@@ -1,14 +1,14 @@
-import { IEvent, IActivityProvider, IActivityDefinition, IStateMachineContext } from "../src/types";
+import { IEvent, IActivityProvider, IActivity, IStateMachineContext } from "../src/types";
 
 export class TestActivityProvider implements IActivityProvider {
     readonly supportedActivities: string[] = [
         'test-activity:return-event'
     ];
 
-    executeActivity(activityDef: IActivityDefinition, stateContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined> {
-        // if (activityDef.activityId === 'test-activity:return-event') {
+    executeActivity(activity: IActivity, stateContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined> {
+        // if (activity.activityId === 'test-activity:return-event') {
         // }
-        let retEvt = activityDef.config?.['event'];
+        let retEvt = activity.config?.['event'];
         return retEvt;
     }
 }

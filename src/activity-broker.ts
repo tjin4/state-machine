@@ -1,4 +1,4 @@
-import { IEvent, IStateMachineContext, IActivityDefinition, IActivityProvider, IActivityBroker } from "./types";
+import { IEvent, IStateMachineContext, IActivity, IActivityProvider, IActivityBroker } from "./types";
 
 export class ActivityBroker implements IActivityBroker {
 
@@ -13,19 +13,19 @@ export class ActivityBroker implements IActivityBroker {
 
     /**
      * If entry activity returns a IEvent, it will be used to drive to next state
-     * @param activityDef 
+     * @param activity 
      * @param stateContext 
      * @param event 
      */
-    async executeActivity(activityDef: IActivityDefinition, stateContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined> {
+    async executeActivity(activity: IActivity, stateContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined> {
 
-        const activityProvider = this.activitieProviders[activityDef.activityId];
+        const activityProvider = this.activitieProviders[activity.activityId];
         if (activityProvider !== undefined) {
-            console.log(`executing activity - ${JSON.stringify(activityDef)}`);
-            return await activityProvider.executeActivity(activityDef, stateContext, event);
+            console.log(`executing activity - ${JSON.stringify(activity)}`);
+            return await activityProvider.executeActivity(activity, stateContext, event);
         }
         else {
-            console.log(`no activity provider registered for '${activityDef.activityId}'`);
+            console.log(`no activity provider registered for '${activity.activityId}'`);
         }
     }
 }

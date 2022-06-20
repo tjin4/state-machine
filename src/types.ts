@@ -51,7 +51,7 @@ export interface IStateMachineContext extends IContext{
     currentStateContext() : Promise<IStateContext | undefined>;
 }
 
-export interface IActivityDefinition {
+export interface IActivity {
     activityId: string;
     name?: string;
     description?: string;
@@ -61,8 +61,8 @@ export interface IActivityDefinition {
 export interface IStateDefinition {
     stateId: string;
     description?: string;   
-    entryActivity?: IActivityDefinition;
-    exitActivity?: IActivityDefinition;
+    entryActivity?: IActivity;
+    exitActivity?: IActivity;
 }
 
 export interface IStateMachineDefinition {
@@ -75,12 +75,12 @@ export interface IStateMachineDefinition {
 
 export interface IActivityProvider {
     readonly supportedActivities : string[];
-    executeActivity(activityDef: IActivityDefinition, stateContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined>;
+    executeActivity(activity: IActivity, stateContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined>;
 }
 
 export interface IActivityBroker {
     
     register(provider: IActivityProvider): Promise<boolean> ;
 
-    executeActivity(activityDef: IActivityDefinition, stateContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined>;
+    executeActivity(activity: IActivity, stateContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined>;
 }

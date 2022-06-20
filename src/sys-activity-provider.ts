@@ -1,4 +1,4 @@
-import { IActivityProvider, IActivityDefinition, IEvent, IStateMachineContext } from "./types";
+import { IActivityProvider, IActivity, IEvent, IStateMachineContext } from "./types";
 import { StateMachineEngine } from './state-machine-engine'
 
 export class SysActivityProvider implements IActivityProvider {
@@ -16,9 +16,9 @@ export class SysActivityProvider implements IActivityProvider {
         this.engine = engine;
     }
 
-    async executeActivity(activityDef: IActivityDefinition, stateMachineContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined> {
+    async executeActivity(activity: IActivity, stateMachineContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined> {
 
-        switch(activityDef.activityId){
+        switch(activity.activityId){
             case 'sys-activity:create-state-machine':{
                 const defDoc: string = await event?.properties['state-machine-definition'];
                 if (defDoc === undefined) {
