@@ -21,13 +21,8 @@
             "entryActivity": {
                 "activityId": "test-activity:return-event",
                 "name": "return event2",
-                "config": {
-                    "event": {
-                        "eventId": "event-from-entry-activity",
-                        "properties": {
-                            "info": "test for transient state"
-                        }
-                    }
+                "inputPropertiesExpression": {
+                    "event": "{'eventId': 'event-from-entry-activity', 'properties': { 'info': `${stateMachineContext.stateId()}  ${event.eventId}`} }"
                 }
             }
         },

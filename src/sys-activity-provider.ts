@@ -1,4 +1,4 @@
-import { IActivityProvider, IActivity, IEvent, IStateMachineContext, IActivityDefinition } from "./types";
+import { IActivityProvider, IActivity, IActivityContext, IEvent, IStateMachineContext, IActivityDefinition } from "./types";
 import { StateMachineEngine } from './state-machine-engine'
 
 export class SysActivityProvider implements IActivityProvider {
@@ -6,7 +6,7 @@ export class SysActivityProvider implements IActivityProvider {
     readonly supportedActivities: IActivityDefinition[] = [
         {
             activityId: 'sys-activity:create-state-machine',
-            inputParams: [
+            inputProperties: [
                 {
                     name: 'state-machine-definition'
                 },
@@ -17,7 +17,7 @@ export class SysActivityProvider implements IActivityProvider {
         },
         {
             activityId: 'sys-activity:run-state-machine',
-            inputParams: [
+            inputProperties: [
                 {
                     name: 'state-machine-id'
                 }
@@ -25,7 +25,7 @@ export class SysActivityProvider implements IActivityProvider {
         },
         {
             activityId: 'sys-activity:stop-state-machine',
-            inputParams: [
+            inputProperties: [
                 {
                     name: 'state-machine-id'
                 }
@@ -33,7 +33,7 @@ export class SysActivityProvider implements IActivityProvider {
         },
         {
             activityId: 'sys-activity:pause-state-machine',
-            inputParams: [
+            inputProperties: [
                 {
                     name: 'state-machine-id'
                 }
@@ -47,7 +47,7 @@ export class SysActivityProvider implements IActivityProvider {
         this.engine = engine;
     }
 
-    async executeActivity(activity: IActivity, stateMachineContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined> {
+    async executeActivity(activity: IActivity, activityContext: IActivityContext, stateMachineContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined> {
 
         switch (activity.activityId) {
             case 'sys-activity:create-state-machine': {

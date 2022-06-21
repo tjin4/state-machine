@@ -58,8 +58,8 @@ export interface IActivity {
     activityId: string; //activity definition id
     description?: string;
 
-    inputParamsExpression?: Record<string, string>;
-    // outputParamsExpression?: Record<string, string>;
+    inputPropertiesExpression?: Record<string, string>;
+    // outputPropertiesExpression?: Record<string, string>;
 
     config?: { [key: string]: any };
 }
@@ -79,7 +79,11 @@ export interface IStateMachineDefinition {
     stateTransitions: Record<string, Record<string, string>>;
 }
 
-export interface IActivityParameterDefinition {
+export type IActivityContext = IContext;
+// export interface IActivityContext extends IContext {
+// }
+
+export interface IActivityPropertyDefinition {
     name: string;
     description?: string;
     isOptional?: boolean;
@@ -93,18 +97,18 @@ export interface IActivityDefinition {
     name?: string;
     description?: string;
 
-    inputParams?: IActivityParameterDefinition[];
-    // outputParams?: IActivityParameterDefinition[];
+    inputProperties?: IActivityPropertyDefinition[];
+    // outputProperties?: IActivityPropertyDefinition[];
 }
 
 export interface IActivityProvider {
     readonly supportedActivities: IActivityDefinition[];
-    executeActivity(activity: IActivity, stateContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined>;
+    executeActivity(activity: IActivity, activityContext: IActivityContext, stateMachineContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined>;
 }
 
 export interface IActivityBroker {
 
     register(provider: IActivityProvider): Promise<boolean>;
 
-    executeActivity(activity: IActivity, stateContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined>;
+    executeActivity(activity: IActivity, stateMachineContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined>;
 }

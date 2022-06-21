@@ -1,12 +1,15 @@
-import { IEvent, IStateMachineContext, IActivity, IActivityProvider, IActivityBroker } from "./types";
+import { IEvent, IStateMachineContext, IActivity, IActivityContext, IActivityProvider, IActivityBroker, IActivityDefinition } from "./types";
+import { ActivityContextFactory } from "./activity-context-factory";
 
 export class ActivityBroker implements IActivityBroker {
 
-    private activitieProviders: Record<string, IActivityProvider> = {};
+    private activityProviders: Record<string, IActivityProvider> = {};
+    private activityDefinitions: Record<string, IActivityDefinition> = {};
 
     async register(activityProvider: IActivityProvider): Promise<boolean> {
         activityProvider.supportedActivities.forEach(activityDef => {
-            this.activitieProviders[activityDef.activityId] = activityProvider;
+            this.activityProviders[activityDef.activityId] = activityProvider;
+            this.activityDefinitions[activityDef.activityId] = activityDef;
         });
         return true;
     }
@@ -17,12 +20,14 @@ export class ActivityBroker implements IActivityBroker {
      * @param stateContext 
      * @param event 
      */
-    async executeActivity(activity: IActivity, stateContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined> {
+    async executeActivity(activity: IActivity, stateMachineContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined> {
 
-        const activityProvider = this.activitieProviders[activity.activityId];
+        const activityProvider = this.activityProviders[activity.activityId];
         if (activityProvider !== undefined) {
             console.log(`executing activity - ${JSON.stringify(activity)}`);
-            return await activityProvider.executeActivity(activity, stateContext, event);
+            const activityDef = this.activityDefinitions[activity.activityId];
+            const activityContext = await ActivityContextFactory.createActivityContext(activity, activityDef, stateMachineContext, event);
+            return await activityProvider.executeActivity(activity, activityContext, stateMachineContext, event);
         }
         else {
             console.log(`no activity provider registered for '${activity.activityId}'`);

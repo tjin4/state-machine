@@ -1,5 +1,5 @@
 import { StateMachineEngine } from '../src/state-machine-engine';
-import { TestActivityProvider } from './test-activity-providert';
+import { TestActivityProvider } from './test-activity-provider';
 import { readFileSync } from 'fs';
 import path from 'path';
 
