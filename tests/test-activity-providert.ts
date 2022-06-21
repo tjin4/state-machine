@@ -1,8 +1,10 @@
-import { IEvent, IActivityProvider, IActivity, IStateMachineContext } from "../src/types";
+import { IEvent, IActivityProvider, IActivity, IStateMachineContext, IActivityDefinition } from "../src/types";
 
 export class TestActivityProvider implements IActivityProvider {
-    readonly supportedActivities: string[] = [
-        'test-activity:return-event'
+    readonly supportedActivities: IActivityDefinition[] = [
+        {
+            activityId: 'test-activity:return-event'
+        }
     ];
 
     executeActivity(activity: IActivity, stateContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined> {

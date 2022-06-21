@@ -1,13 +1,44 @@
-import { IActivityProvider, IActivity, IEvent, IStateMachineContext } from "./types";
+import { IActivityProvider, IActivity, IEvent, IStateMachineContext, IActivityDefinition } from "./types";
 import { StateMachineEngine } from './state-machine-engine'
 
 export class SysActivityProvider implements IActivityProvider {
-   
-    readonly supportedActivities: string[] = [
-        'sys-activity:create-state-machine',
-        'sys-activity:run-state-machine',
-        'sys-activity:stop-state-machine',
-        'sys-activity:pause-state-machine'
+
+    readonly supportedActivities: IActivityDefinition[] = [
+        {
+            activityId: 'sys-activity:create-state-machine',
+            inputParams: [
+                {
+                    name: 'state-machine-definition'
+                },
+                {
+                    name: 'auto-start'
+                }
+            ]
+        },
+        {
+            activityId: 'sys-activity:run-state-machine',
+            inputParams: [
+                {
+                    name: 'state-machine-id'
+                }
+            ]
+        },
+        {
+            activityId: 'sys-activity:stop-state-machine',
+            inputParams: [
+                {
+                    name: 'state-machine-id'
+                }
+            ]
+        },
+        {
+            activityId: 'sys-activity:pause-state-machine',
+            inputParams: [
+                {
+                    name: 'state-machine-id'
+                }
+            ]
+        }
     ];
 
     private engine: StateMachineEngine;
@@ -18,8 +49,8 @@ export class SysActivityProvider implements IActivityProvider {
 
     async executeActivity(activity: IActivity, stateMachineContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined> {
 
-        switch(activity.activityId){
-            case 'sys-activity:create-state-machine':{
+        switch (activity.activityId) {
+            case 'sys-activity:create-state-machine': {
                 const defDoc: string = await event?.properties['state-machine-definition'];
                 if (defDoc === undefined) {
                     return { eventId: 'sys-event.failure', stateMachineId: stateMachineContext.contextId, properties: { "info": "missing state-machine-definition" } };
@@ -28,15 +59,15 @@ export class SysActivityProvider implements IActivityProvider {
                 (await stateMachineContext.currentStateContext())?.set('new-state-machine-id', (await stateMachine).context.contextId);
                 break;
             }
-            case 'sys-activity:run-state-machine':{
+            case 'sys-activity:run-state-machine': {
 
                 break;
             }
-            case 'sys-activity:stop-state-machine':{
+            case 'sys-activity:stop-state-machine': {
 
                 break;
             }
-            case 'sys-activity:pause-state-machine':{
+            case 'sys-activity:pause-state-machine': {
 
                 break;
             }

@@ -5,6 +5,9 @@ import path from 'path';
 
 test('StateMachineEngine.run', async () => {
 
+    const event = {eventId: "1234", properties: {stateMachineId: 'stateMachine1'}}
+    const expression = 'event.properties["stateMachineId"]';
+    let id= eval(expression);
 
     const doc = readFileSync(path.join(__dirname, 'sample-state-machine-def-dict-doc.json')).toString();
 

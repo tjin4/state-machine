@@ -5,8 +5,8 @@ export class ActivityBroker implements IActivityBroker {
     private activitieProviders: Record<string, IActivityProvider> = {};
 
     async register(activityProvider: IActivityProvider): Promise<boolean> {
-        activityProvider.supportedActivities.forEach(activityId => {
-            this.activitieProviders[activityId] = activityProvider;
+        activityProvider.supportedActivities.forEach(activityDef => {
+            this.activitieProviders[activityDef.activityId] = activityProvider;
         });
         return true;
     }

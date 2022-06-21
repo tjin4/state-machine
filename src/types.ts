@@ -16,7 +16,7 @@ export interface IContext {
     getProperties(): Promise<Record<string, any>>;
 
     get(key: string): Promise<any>;
-    set(key: string, value: any): Promise<void>;   
+    set(key: string, value: any): Promise<void>;
 
     destroy(): Promise<void>;
 }
@@ -32,35 +32,41 @@ export interface IStateContext extends IContext {
 /**
  * Represent a context of the current state machine instance, accessible to all states
  */
-export interface IStateMachineContext extends IContext{
-    
+export interface IStateMachineContext extends IContext {
+
     readonly stateMachineDefId: string;
 
     /**
      * synchrously return cached stateId, this is not exposed as property because it needs 
      * to set internally, but readonly for external
      */
-    stateId(): string | undefined; 
+    stateId(): string | undefined;
 
     getStateId(): Promise<string | undefined>;
     setStateId(stateId?: string): Promise<void>;
-   
+
     getExecStatus(): Promise<EXEC_STATUS>;
     setExecStatus(execStatus: EXEC_STATUS): Promise<void>;
 
-    currentStateContext() : Promise<IStateContext | undefined>;
+    currentStateContext(): Promise<IStateContext | undefined>;
 }
 
+/**
+ * represent a configured instance of activity
+ */
 export interface IActivity {
-    activityId: string;
-    name?: string;
+    activityId: string; //activity definition id
     description?: string;
-    config?: {[key:string]: any};
+
+    inputParamsExpression?: Record<string, string>;
+    // outputParamsExpression?: Record<string, string>;
+
+    config?: { [key: string]: any };
 }
 
 export interface IStateDefinition {
     stateId: string;
-    description?: string;   
+    description?: string;
     entryActivity?: IActivity;
     exitActivity?: IActivity;
 }
@@ -73,14 +79,32 @@ export interface IStateMachineDefinition {
     stateTransitions: Record<string, Record<string, string>>;
 }
 
+export interface IActivityParameterDefinition {
+    name: string;
+    description?: string;
+    isOptional?: boolean;
+}
+
+/**
+ * represent an activity meta data
+ */
+export interface IActivityDefinition {
+    activityId: string;
+    name?: string;
+    description?: string;
+
+    inputParams?: IActivityParameterDefinition[];
+    // outputParams?: IActivityParameterDefinition[];
+}
+
 export interface IActivityProvider {
-    readonly supportedActivities : string[];
+    readonly supportedActivities: IActivityDefinition[];
     executeActivity(activity: IActivity, stateContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined>;
 }
 
 export interface IActivityBroker {
-    
-    register(provider: IActivityProvider): Promise<boolean> ;
+
+    register(provider: IActivityProvider): Promise<boolean>;
 
     executeActivity(activity: IActivity, stateContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined>;
 }
