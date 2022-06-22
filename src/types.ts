@@ -51,6 +51,8 @@ export interface IStateMachineContext extends IContext {
     currentStateContext(): Promise<IStateContext | undefined>;
 }
 
+export type ExpressionEvalMode = 'sync' | 'async';
+
 /**
  * represent a configured instance of activity
  */
@@ -58,7 +60,37 @@ export interface IActivity {
     activityId: string; //activity definition id
     description?: string;
 
+    /**
+     * input property expression must resolve to a single value that will be 
+     * assigned to the input property in IActivityContext.
+ 
+    * 'state', 'local' and 'event' can be used in expression to 
+     * synchrously get values from stateMachineContext, stateContext (local), 
+     * and event.
+     * examples:
+     * "`https://${state['host']}:${state['port']}/${local['uri']}`"
+     * "{id:state['id], name:state['name']}"
+     * 
+     * The above approach implies we have to prefetch all properties from 
+     * the stateMachineContext and stateContext before evaluating the expression. 
+     * A more effient way is using the stateMachineContext directly to access
+     * properties lazily, through the async get().
+     * examples:
+     * "`https://${await state.get('host')}:${await state.get('port')}/${await local.get('uri')}`"
+     * "{id: await state.get('id'), name: await state.get('name')}"
+     * 
+     */
     inputPropertiesExpression?: Record<string, string>;
+    inputPropertiesExpressionEvalMode?: ExpressionEvalMode; // undefined default to 'async'
+
+    /**
+     * output property expression should specify the property name in stateMachineContext/stateLoalContext.
+     * The value of the output activity property will be copied to the stateMachineContext/stateLocalContext
+     * 
+     * examples:
+     * state.url, state['url']
+     * local.port, local['port']
+     */
     outputPropertiesExpression?: Record<string, string>;
 }
 
@@ -95,6 +127,7 @@ export interface IActivityManifest {
     name?: string;
     description?: string;
 
+    allowedInputPropertiesExpressionEvalMode?: ExpressionEvalMode; // undefined default to 'both'
     inputProperties?: IActivityPropertyManifest[];
     outputProperties?: IActivityPropertyManifest[];
 }
