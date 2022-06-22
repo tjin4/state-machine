@@ -81,7 +81,7 @@ export type IActivityContext = IContext;
 // export interface IActivityContext extends IContext {
 // }
 
-export interface IActivityPropertyDefinition {
+export interface IActivityPropertyManifest {
     name: string;
     description?: string;
     isOptional?: boolean;
@@ -95,8 +95,8 @@ export interface IActivityManifest {
     name?: string;
     description?: string;
 
-    inputProperties?: IActivityPropertyDefinition[];
-    outputProperties?: IActivityPropertyDefinition[];
+    inputProperties?: IActivityPropertyManifest[];
+    outputProperties?: IActivityPropertyManifest[];
 }
 
 export interface IActivityProvider {

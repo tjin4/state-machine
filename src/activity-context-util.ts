@@ -10,17 +10,17 @@ export class ActivityContextUtil {
 
     static async evalInputProperties(activity: IActivity, activityManifest: IActivityManifest, activityContext: IActivityContext, stateMachineContext: IStateMachineContext, event?: IEvent): Promise<void> {
         if(activityManifest.inputProperties){
-            for(const propDef of activityManifest.inputProperties) {
-                const expression = activity.inputPropertiesExpression?.[propDef.name];
+            for(const propManifest of activityManifest.inputProperties) {
+                const expression = activity.inputPropertiesExpression?.[propManifest.name];
                 if(expression === undefined){
-                    if(!propDef.isOptional){
-                        throw new Error(`missing mandatary input property '${propDef.name}' in activity '${activity.activityId}' [stateMachineId=${stateMachineContext.contextId}], stateId=${stateMachineContext.stateId()}`);
+                    if(!propManifest.isOptional){
+                        throw new Error(`missing mandatary input property '${propManifest.name}' in activity '${activity.activityId}' [stateMachineId=${stateMachineContext.contextId}], stateId=${stateMachineContext.stateId()}`);
                     }
                 }
                 else{
                     const expressionWrap = `(${expression})`; // if expression is a json object start with '{', then eval() will confuse it with beginnning of a block, so wrap with ()
                     const value = eval(expressionWrap);
-                    await activityContext.set(propDef.name, value);
+                    await activityContext.set(propManifest.name, value);
                 }
             };
         }
@@ -28,13 +28,13 @@ export class ActivityContextUtil {
 
     static async evalOutputProperties(activity: IActivity, activityManifest: IActivityManifest, activityContext: IActivityContext, stateMachineContext: IStateMachineContext, event?: IEvent): Promise<void> {
         if(activityManifest.outputProperties){
-            for(const propDef of activityManifest.outputProperties) {
-                const expression = activity.outputPropertiesExpression?.[propDef.name];
+            for(const propManifest of activityManifest.outputProperties) {
+                const expression = activity.outputPropertiesExpression?.[propManifest.name];
                 if(expression !== undefined){
-                    const propertyValue = await activityContext.get(propDef.name);
+                    const propertyValue = await activityContext.get(propManifest.name);
                     if(propertyValue === undefined){
-                        if(!propDef.isOptional){
-                            throw new Error(`missing mandatary output property '${propDef.name}' in activity '${activity.activityId}' [stateMachineId=${stateMachineContext.contextId}], stateId=${stateMachineContext.stateId()}`);
+                        if(!propManifest.isOptional){
+                            throw new Error(`missing mandatary output property '${propManifest.name}' in activity '${activity.activityId}' [stateMachineId=${stateMachineContext.contextId}], stateId=${stateMachineContext.stateId()}`);
                         }
                     }
                     else {
