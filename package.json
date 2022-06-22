@@ -6,8 +6,9 @@
   "scripts": {
     "build": "npx tsc",
     "test": "npx jest",
-    "start-postgres": "docker run --pull missing --name postgres-1 -p 127.0.0.1:5430:5432 -e POSTGRES_PASSWORD=postgres -d postgres",
-    "stop-postgres": "docker stop postgres-1"
+    "restart-db": "npm run rm-postgres && npm run run-postgres",
+    "run-postgres": "docker run --pull missing --name postgres-1 -v //c/github/tjin4/state-machine/scripts/db-scripts:/docker-entrypoint-initdb.d/ -p 127.0.0.1:5430:5432 -e POSTGRES_PASSWORD=postgres -d postgres",
+    "rm-postgres": "docker stop postgres-1 && docker rm postgres-1"
   },
   "author": "",
   "license": "ISC",
