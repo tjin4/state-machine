@@ -1,5 +1,5 @@
 import { IEvent, IStateMachineContext, IActivity, IActivityContext, IActivityProvider, IActivityBroker, IActivityDefinition } from "./types";
-import { ActivityContextFactory } from "./activity-context-factory";
+import { ActivityContextUtil } from "./activity-context-util";
 
 export class ActivityBroker implements IActivityBroker {
 
@@ -25,9 +25,18 @@ export class ActivityBroker implements IActivityBroker {
         const activityProvider = this.activityProviders[activity.activityId];
         if (activityProvider !== undefined) {
             console.log(`executing activity - ${JSON.stringify(activity)}`);
+
             const activityDef = this.activityDefinitions[activity.activityId];
-            const activityContext = await ActivityContextFactory.createActivityContext(activity, activityDef, stateMachineContext, event);
-            return await activityProvider.executeActivity(activity, activityContext, stateMachineContext, event);
+            const activityContext = await ActivityContextUtil.createActivityContext();
+            
+            ActivityContextUtil.evalInputProperties(activity, activityDef, activityContext, stateMachineContext, event);
+            
+            const ret = await activityProvider.executeActivity(activity, activityContext, stateMachineContext, event);
+            
+            ActivityContextUtil.evalOutputProperties(activity, activityDef, activityContext, stateMachineContext, event);
+            activityContext.destroy();
+
+            return ret;
         }
         else {
             console.log(`no activity provider registered for '${activity.activityId}'`);

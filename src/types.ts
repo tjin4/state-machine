@@ -59,9 +59,7 @@ export interface IActivity {
     description?: string;
 
     inputPropertiesExpression?: Record<string, string>;
-    // outputPropertiesExpression?: Record<string, string>;
-
-    config?: { [key: string]: any };
+    outputPropertiesExpression?: Record<string, string>;
 }
 
 export interface IStateDefinition {
@@ -98,7 +96,7 @@ export interface IActivityDefinition {
     description?: string;
 
     inputProperties?: IActivityPropertyDefinition[];
-    // outputProperties?: IActivityPropertyDefinition[];
+    outputProperties?: IActivityPropertyDefinition[];
 }
 
 export interface IActivityProvider {
