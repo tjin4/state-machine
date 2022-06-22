@@ -29,11 +29,11 @@ export class ActivityBroker implements IActivityBroker {
             const activityManifest = this.activityManifests[activity.activityId];
             const activityContext = await ActivityContextUtil.createActivityContext();
 
-            ActivityContextUtil.evalInputProperties(activity, activityManifest, activityContext, stateMachineContext, event);
+            await ActivityContextUtil.evalInputProperties(activity, activityManifest, activityContext, stateMachineContext, event);
             
             const ret = await activityProvider.executeActivity(activity, activityContext, stateMachineContext, event);
             
-            ActivityContextUtil.evalOutputProperties(activity, activityManifest, activityContext, stateMachineContext, event);
+            await ActivityContextUtil.evalOutputProperties(activity, activityManifest, activityContext, stateMachineContext, event);
             activityContext.destroy();
 
             return ret;
