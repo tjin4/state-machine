@@ -90,7 +90,7 @@ export interface IActivityPropertyDefinition {
 /**
  * represent an activity meta data
  */
-export interface IActivityDefinition {
+export interface IActivityManifest {
     activityId: string;
     name?: string;
     description?: string;
@@ -100,7 +100,7 @@ export interface IActivityDefinition {
 }
 
 export interface IActivityProvider {
-    readonly supportedActivities: IActivityDefinition[];
+    readonly supportedActivities: IActivityManifest[];
     executeActivity(activity: IActivity, activityContext: IActivityContext, stateMachineContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined>;
 }
 

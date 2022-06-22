@@ -1,15 +1,15 @@
-import { IEvent, IStateMachineContext, IActivity, IActivityContext, IActivityProvider, IActivityBroker, IActivityDefinition } from "./types";
+import { IEvent, IStateMachineContext, IActivity, IActivityContext, IActivityProvider, IActivityBroker, IActivityManifest } from "./types";
 import { ActivityContextUtil } from "./activity-context-util";
 
 export class ActivityBroker implements IActivityBroker {
 
     private activityProviders: Record<string, IActivityProvider> = {};
-    private activityDefinitions: Record<string, IActivityDefinition> = {};
+    private activityManifests: Record<string, IActivityManifest> = {};
 
     async register(activityProvider: IActivityProvider): Promise<boolean> {
-        activityProvider.supportedActivities.forEach(activityDef => {
-            this.activityProviders[activityDef.activityId] = activityProvider;
-            this.activityDefinitions[activityDef.activityId] = activityDef;
+        activityProvider.supportedActivities.forEach(activityManifest => {
+            this.activityProviders[activityManifest.activityId] = activityProvider;
+            this.activityManifests[activityManifest.activityId] = activityManifest;
         });
         return true;
     }
@@ -26,14 +26,14 @@ export class ActivityBroker implements IActivityBroker {
         if (activityProvider !== undefined) {
             console.log(`executing activity - ${JSON.stringify(activity)}`);
 
-            const activityDef = this.activityDefinitions[activity.activityId];
+            const activityManifest = this.activityManifests[activity.activityId];
             const activityContext = await ActivityContextUtil.createActivityContext();
-            
-            ActivityContextUtil.evalInputProperties(activity, activityDef, activityContext, stateMachineContext, event);
+
+            ActivityContextUtil.evalInputProperties(activity, activityManifest, activityContext, stateMachineContext, event);
             
             const ret = await activityProvider.executeActivity(activity, activityContext, stateMachineContext, event);
             
-            ActivityContextUtil.evalOutputProperties(activity, activityDef, activityContext, stateMachineContext, event);
+            ActivityContextUtil.evalOutputProperties(activity, activityManifest, activityContext, stateMachineContext, event);
             activityContext.destroy();
 
             return ret;

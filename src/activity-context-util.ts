@@ -1,4 +1,4 @@
-import { IActivity, IActivityContext, IActivityDefinition, IEvent, IStateMachineContext } from "./types";
+import { IActivity, IActivityContext, IActivityManifest, IEvent, IStateMachineContext } from "./types";
 import { InMemoryContext } from './in-memory/context';
 
 export class ActivityContextUtil {
@@ -8,9 +8,9 @@ export class ActivityContextUtil {
         return activityContext;
     }
 
-    static async evalInputProperties(activity: IActivity, activityDef: IActivityDefinition, activityContext: IActivityContext, stateMachineContext: IStateMachineContext, event?: IEvent): Promise<void> {
-        if(activityDef.inputProperties){
-            for(const propDef of activityDef.inputProperties) {
+    static async evalInputProperties(activity: IActivity, activityManifest: IActivityManifest, activityContext: IActivityContext, stateMachineContext: IStateMachineContext, event?: IEvent): Promise<void> {
+        if(activityManifest.inputProperties){
+            for(const propDef of activityManifest.inputProperties) {
                 const expression = activity.inputPropertiesExpression?.[propDef.name];
                 if(expression === undefined){
                     if(!propDef.isOptional){
@@ -26,9 +26,9 @@ export class ActivityContextUtil {
         }
     }
 
-    static async evalOutputProperties(activity: IActivity, activityDef: IActivityDefinition, activityContext: IActivityContext, stateMachineContext: IStateMachineContext, event?: IEvent): Promise<void> {
-        if(activityDef.outputProperties){
-            for(const propDef of activityDef.outputProperties) {
+    static async evalOutputProperties(activity: IActivity, activityManifest: IActivityManifest, activityContext: IActivityContext, stateMachineContext: IStateMachineContext, event?: IEvent): Promise<void> {
+        if(activityManifest.outputProperties){
+            for(const propDef of activityManifest.outputProperties) {
                 const expression = activity.outputPropertiesExpression?.[propDef.name];
                 if(expression !== undefined){
                     const propertyValue = await activityContext.get(propDef.name);

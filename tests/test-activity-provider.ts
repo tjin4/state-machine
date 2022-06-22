@@ -1,7 +1,7 @@
-import { IEvent, IActivityProvider, IActivity, IActivityContext, IStateMachineContext, IActivityDefinition } from "../src/types";
+import { IEvent, IActivityProvider, IActivity, IActivityContext, IStateMachineContext, IActivityManifest } from "../src/types";
 
 export class TestActivityProvider implements IActivityProvider {
-    readonly supportedActivities: IActivityDefinition[] = [
+    readonly supportedActivities: IActivityManifest[] = [
         {
             activityId: 'test-activity:return-event',
             inputProperties: [

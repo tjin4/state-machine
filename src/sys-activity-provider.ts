@@ -1,9 +1,9 @@
-import { IActivityProvider, IActivity, IActivityContext, IEvent, IStateMachineContext, IActivityDefinition } from "./types";
+import { IActivityProvider, IActivity, IActivityContext, IEvent, IStateMachineContext, IActivityManifest } from "./types";
 import { StateMachineEngine } from './state-machine-engine'
 
 export class SysActivityProvider implements IActivityProvider {
 
-    readonly supportedActivities: IActivityDefinition[] = [
+    readonly supportedActivities: IActivityManifest[] = [
         {
             activityId: 'sys-activity:create-state-machine',
             inputProperties: [
