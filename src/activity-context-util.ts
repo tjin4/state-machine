@@ -95,7 +95,7 @@ export class ActivityContextUtil {
     }
 
     private static async evalAsyncExpression(expression: string, state: IStateMachineContext | Record<string,any>, local: IStateContext | Record<string, any>, event?: IEvent) : Promise<any> {
-        // example: "`https://${await state.get('host')}:${await state.get('port')}/${await (await local.get('uri')}`"
+        // example: "`https://${await state.get('host')}:${await state.get('port')}/${await local.get('uri')}`"
 
         const expressionWrap = `{return (${expression})}`;
         const AsyncFunc = Object.getPrototypeOf(async function(){}).constructor;
