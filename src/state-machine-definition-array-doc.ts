@@ -1,24 +1,11 @@
-import { IEvent } from "./types";
+import { IStateDefinition, IEvent } from "./types";
 
-export class ActivityDefinition {
-    activityId: string = '';
-    name?: string;
-    description?: string;
-    config: {[key:string]: any} = {};
-}
-
-export class StateDefinition {
-    stateId: string = '';
-    description?: string;   
-    entryActivity?: ActivityDefinition;
-    exitActivity?: ActivityDefinition;
-}
 
 export class StateMachineDefinition {
     private definitionId?: string;
     private description?: string;
     private initStateId?: string;
-    private states: { [stateId: string]: StateDefinition } = {};
+    private states: { [stateId: string]: IStateDefinition } = {};
     private stateTransitionTable: { [stateId: string]: { [eventId: string]: string } } = {};
 
     public load(docString: string) {
@@ -54,7 +41,7 @@ export class StateMachineDefinition {
         return this.initStateId;
     }
 
-    public getStateDefinition(stateId: string): StateDefinition {
+    public getStateDefinition(stateId: string): IStateDefinition {
         return this.states[stateId];
     }
 

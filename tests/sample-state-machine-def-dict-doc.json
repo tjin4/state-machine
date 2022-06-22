@@ -21,13 +21,12 @@
             "entryActivity": {
                 "activityId": "test-activity:return-event",
                 "name": "return event2",
-                "config": {
-                    "event": {
-                        "eventId": "event-from-entry-activity",
-                        "properties": {
-                            "info": "test for transient state"
-                        }
-                    }
+                "inputPropertiesExpressionEvalMode": "async", 
+                "inputPropertiesExpression": {
+                    "event": "{'eventId': 'event-from-entry-activity', 'properties': { 'info': `${await state.get('stateId')}  ${event.eventId}`} }"
+                },
+                "outputPropertiesExpression": {
+                    "output-prop1": "state['output-from-test-activity']"
                 }
             }
         },

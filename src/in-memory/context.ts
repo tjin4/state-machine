@@ -35,6 +35,10 @@ export class InMemoryContext implements IContext {
         return this._properties;
     }
     
+    async flush(): Promise<void> {
+        
+    }
+
     async destroy(): Promise<void> {
         
     }
