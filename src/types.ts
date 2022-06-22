@@ -18,6 +18,11 @@ export interface IContext {
     get(key: string): Promise<any>;
     set(key: string, value: any): Promise<void>;
 
+    /**
+     * persist dirty properities in getProperties() dictionary
+     */
+    flush(): Promise<void>;
+
     destroy(): Promise<void>;
 }
 

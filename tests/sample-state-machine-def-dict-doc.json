@@ -26,7 +26,7 @@
                     "event": "{'eventId': 'event-from-entry-activity', 'properties': { 'info': `${await state.get('stateId')}  ${event.eventId}`} }"
                 },
                 "outputPropertiesExpression": {
-                    "output-prop1": "await stateMachineContext.set('output-from-test-activity', propertyValue);"
+                    "output-prop1": "state['output-from-test-activity']"
                 }
             }
         },

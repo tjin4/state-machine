@@ -11,33 +11,33 @@ export class ActivityContextUtil {
     static async evalInputProperties(activity: IActivity, activityManifest: IActivityManifest, activityContext: IActivityContext, stateMachineContext: IStateMachineContext, event?: IEvent): Promise<void> {
         //validate activity.inputPropertiesExpressionEvalMode
         const inputPropertiesEvalMode = activity.inputPropertiesExpressionEvalMode ?? 'async';
-        if(activityManifest.allowedInputPropertiesExpressionEvalMode && activityManifest.allowedInputPropertiesExpressionEvalMode !== inputPropertiesEvalMode){
+        if (activityManifest.allowedInputPropertiesExpressionEvalMode && activityManifest.allowedInputPropertiesExpressionEvalMode !== inputPropertiesEvalMode) {
             throw new Error(`activity.inputPropertiesEvalMode '${inputPropertiesEvalMode}' is not allowed in activity manifest '${activityManifest.activityId}'`);
         }
 
         //setup expression eval context: state, local, event
         const stateContext = await stateMachineContext.currentStateContext();
-        if(stateContext === undefined){
+        if (stateContext === undefined) {
             throw new Error('Internal error, activity must run inside a state context');
         }
-        let state: IStateMachineContext | Record<string,any> = stateMachineContext;
+        let state: IStateMachineContext | Record<string, any> = stateMachineContext;
         let local: IStateContext | Record<string, any> = stateContext;
-        if(inputPropertiesEvalMode === 'sync'){
+        if (inputPropertiesEvalMode === 'sync') {
             state = await state.getProperties();
             local = await local.getProperties();
         }
-       
+
         //
-        if(activityManifest.inputProperties){
-            for(const propManifest of activityManifest.inputProperties) {
+        if (activityManifest.inputProperties) {
+            for (const propManifest of activityManifest.inputProperties) {
                 const expression = activity.inputPropertiesExpression?.[propManifest.name];
-                if(expression === undefined){
-                    if(!propManifest.isOptional){
+                if (expression === undefined) {
+                    if (!propManifest.isOptional) {
                         throw new Error(`missing mandatary input property '${propManifest.name}' in activity '${activity.activityId}' [stateMachineId=${stateMachineContext.contextId}], stateId=${stateMachineContext.stateId()}`);
                     }
                 }
-                else{
-                    const value = await ActivityContextUtil.evalInputExpression(inputPropertiesEvalMode, expression, state, local, event);
+                else {
+                    const value = await ActivityContextUtil.evalInputPropertyExpression(inputPropertiesEvalMode, expression, state, local, event);
                     await activityContext.set(propManifest.name, value);
                 }
             };
@@ -46,47 +46,46 @@ export class ActivityContextUtil {
 
     static async evalOutputProperties(activity: IActivity, activityManifest: IActivityManifest, activityContext: IActivityContext, stateMachineContext: IStateMachineContext, event?: IEvent): Promise<void> {
         const stateContext = await stateMachineContext.currentStateContext();
-        if(stateContext === undefined){
+        if (stateContext === undefined) {
             throw new Error('Internal error, activity must run inside a state context');
         }
 
-        //setup expression eval context: state, local, event
-        let state: IStateMachineContext | Record<string,any> = stateMachineContext;
-        let local: IStateContext | Record<string, any> = stateContext;
+        //setup expression eval context: state, local
+        let state: IStateMachineContext = stateMachineContext;
+        let local: IStateContext = stateContext;
 
-        if(activityManifest.outputProperties){
-            for(const propManifest of activityManifest.outputProperties) {
+        if (activityManifest.outputProperties) {
+            for (const propManifest of activityManifest.outputProperties) {
                 const expression = activity.outputPropertiesExpression?.[propManifest.name];
-                if(expression !== undefined){
+                if (expression !== undefined) {
                     const propertyValue = await activityContext.get(propManifest.name);
-                    if(propertyValue === undefined){
-                        if(!propManifest.isOptional){
+                    if (propertyValue === undefined) {
+                        if (!propManifest.isOptional) {
                             throw new Error(`missing mandatary output property '${propManifest.name}' in activity '${activity.activityId}' [stateMachineId=${stateMachineContext.contextId}], stateId=${stateMachineContext.stateId()}`);
                         }
                     }
                     else {
-                        const expressionWrap = `(async()=>{${expression}})()`;
-                        eval(expressionWrap); //await stateMachineContext.set('key', propertyValue);
+                        // const expressionWrap = `(async()=>{${expression}})()`;
+                        // eval(expressionWrap); //await stateMachineContext.set('key', propertyValue);
+                        await ActivityContextUtil.evalOutputPropertyExpression(expression, propertyValue, state, local);
                     }
                 }
             };
         }
-    } 
+    }
 
-    private static async evalInputExpression(evalMode: 'sync'|'async', expression: string, state: IStateMachineContext | Record<string,any>, local: IStateContext | Record<string, any>, event?: IEvent): Promise<any> {
-        if(evalMode === 'sync'){
-            return ActivityContextUtil.evalSyncExpression(expression, state, local, event);
+    private static async evalInputPropertyExpression(evalMode: 'sync' | 'async', expression: string, state: IStateMachineContext | Record<string, any>, local: IStateContext | Record<string, any>, event?: IEvent): Promise<any> {
+        if (evalMode === 'sync') {
+            return ActivityContextUtil.evalSyncInputPropertyExpression(expression, state, local, event);
         }
-        else{
-            return await ActivityContextUtil.evalAsyncExpression(expression, state, local, event);
+        else {
+            return await ActivityContextUtil.evalAsyncInputPropertyExpression(expression, state, local, event);
         }
     }
 
-    private static evalSyncExpression(expression: string, state: IStateMachineContext | Record<string,any>, local: IStateContext | Record<string, any>, event?: IEvent) : any {
-        // example: "{id: await state.get('id'), name: await state.get('name')}"
-        
-        // const expressionWrap = `(${expression})`; // if expression is a json object start with '{', then eval() will confuse it with beginnning of a block, so wrap with ()
-        // const value = eval(expressionWrap);
+    private static evalSyncInputPropertyExpression(expression: string, state: IStateMachineContext | Record<string, any>, local: IStateContext | Record<string, any>, event?: IEvent): any {
+        // example expression: "{host: state['id'], port: local.port, uri: event.properties['uri']}"
+        // example expression: "`https://${state.host}:${local.port}/${local.uri)}`"
 
         const expressionWrap = `{return (${expression})}`;
         const func = Function('state', 'local', 'event', expressionWrap);
@@ -94,13 +93,46 @@ export class ActivityContextUtil {
         return value;
     }
 
-    private static async evalAsyncExpression(expression: string, state: IStateMachineContext | Record<string,any>, local: IStateContext | Record<string, any>, event?: IEvent) : Promise<any> {
-        // example: "`https://${await state.get('host')}:${await state.get('port')}/${await local.get('uri')}`"
+    private static async evalAsyncInputPropertyExpression(expression: string, state: IStateMachineContext | Record<string, any>, local: IStateContext | Record<string, any>, event?: IEvent): Promise<any> {
+        // example expression: "{host: await state.get('host'), port: await local.get('port'), uri: event.properties['uri']}"
+        // example expression: "`https://${await state.get('host')}:${await local.get('port')}/${event.properties['uri']}`"
 
         const expressionWrap = `{return (${expression})}`;
-        const AsyncFunc = Object.getPrototypeOf(async function(){}).constructor;
+        const AsyncFunc = Object.getPrototypeOf(async function () { }).constructor;
         const asyncFunc = new AsyncFunc('state', 'local', 'event', expressionWrap);
         const value = await asyncFunc(state, local, event);
         return value;
+    }
+
+    private static async evalOutputPropertyExpression(expression: string, propertyValue: any, state: IStateMachineContext, local: IStateContext): Promise<void> {
+        // example: "state.propertyName", "state['propertyName']", "local.propertyName"
+
+        const { context, propertyName } = this.extractOutputPropertyExpress(expression);
+        const expressionWrap = `{await ${context}.set("${propertyName}", propertyValue);}`;
+        const AsyncFunc = Object.getPrototypeOf(async function () { }).constructor;
+        const asyncFunc = new AsyncFunc('state', 'local', 'propertyValue', expressionWrap);
+        await asyncFunc(state, local, propertyValue);
+    }
+
+    private static extractOutputPropertyExpress(expression: string): { context: string, propertyName: string } {
+
+        // normalize to dot format
+        let expression_ = expression.trim()
+            .replace('[', '.')
+            .replace('"', '')
+            .replace("'", "")
+            .replace(']', '');
+
+        const dotIdx = expression_.indexOf('.');
+        if (dotIdx <= 0) {
+            throw new Error(`output property expresssion is not in valid format ${expression}`);
+        }
+        const context = expression_.slice(0, dotIdx);
+        if (context !== 'state' && context !== 'local') {
+            throw new Error(`output property expresssion is not in valid format, context part must be "state" or "local",  ${expression}`);
+        }
+        const propertyName = expression_.slice(dotIdx + 1);
+        return { context, propertyName };
+
     }
 }
