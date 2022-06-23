@@ -1,13 +1,7 @@
 
-create type CONTEXT_TYPE as enum (
-    'state-machine',
-    'state',
-    'activity'
-);
-
 CREATE TABLE context (
     context_id VARCHAR(512) PRIMARY KEY,
-    context_type CONTEXT_TYPE,
+    context_type VARCHAR(128),
     description TEXT
 );
 comment on table context is 'context definition';
