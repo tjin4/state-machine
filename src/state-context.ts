@@ -19,6 +19,8 @@ export class StateContext extends Context implements IStateContext {
         await super.init();
         await this.set('stateMachineContextId', this.stateMachineContextId);
         await this.set('stateId', this.stateId);
+        this.immutableProps['stateMachineContextId'] = true;
+        this.immutableProps['stateId'] = true;
     }
 
     static async createStateConext(stateMachineContextId: string, stateId: string, contextId?: string): Promise<IStateContext> {

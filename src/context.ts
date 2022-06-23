@@ -8,14 +8,16 @@ export class Context implements IContext {
     readonly contextId: string;
     protected properties: { [key: string]: any } = {};
     protected persistContext?: IContext;
+    protected immutableProps: Record<string, boolean> = {};
 
     protected constructor(contextId: string, persistContext?: IContext){
         this.contextId = contextId;
+        this.properties['contextId'] = contextId;
         this.persistContext = persistContext;
     }
 
     protected async init(): Promise<void>{
-        await this.set('contextId', this.contextId);
+        this.immutableProps['contextId'] = true;
     }
 
     static async createContext(contextId?: string): Promise<IContext> {
@@ -42,6 +44,10 @@ export class Context implements IContext {
     }
 
     async set(name: string, value: any): Promise<void> {
+        if(this.immutableProps[name]){
+            return;
+        }
+
         this.properties[name] = value;
         if(this.persistContext){
             await this.persistContext.set(name, value);            

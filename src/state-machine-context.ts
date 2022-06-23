@@ -20,6 +20,7 @@ export class StateMachineContext extends Context implements IStateMachineContext
     protected async init(): Promise<void> {
         await super.init();
         await this.set('stateMachineDefId', this.stateMachineDefId);
+        this.immutableProps['stateMachineDefId'] = true;
     }
 
     static async createStateMachineContext(stateMachineDefId: string, contextId?: string): Promise<IStateMachineContext> {

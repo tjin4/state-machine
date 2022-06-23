@@ -1,10 +1,12 @@
 import { IActivity, IActivityContext, IActivityManifest, IActivityPropertyManifest, IEvent, IStateContext, IStateMachineContext } from "./types";
 import { Context } from './context';
+import { v4 as uuidv4 } from 'uuid';
 
 export class ActivityContextUtil {
 
     static async createActivityContext(): Promise<IActivityContext> {
-        const activityContext = await Context.createContext();
+        const activityContextId = `activity:uuidv4()`;
+        const activityContext = await Context.createContext(activityContextId);
         return activityContext;
     }
 
