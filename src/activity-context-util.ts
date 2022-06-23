@@ -118,10 +118,10 @@ export class ActivityContextUtil {
 
         // normalize to dot format
         let expression_ = expression.trim()
-            .replace('[', '.')
-            .replace('"', '')
-            .replace("'", "")
-            .replace(']', '');
+            .replaceAll('[', '.')
+            .replaceAll('"', '')
+            .replaceAll("'", "")
+            .replaceAll(']', '');
 
         const dotIdx = expression_.indexOf('.');
         if (dotIdx <= 0) {

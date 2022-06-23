@@ -37,16 +37,21 @@ export class PgContext implements IContext {
         if(result.rowCount === 1){
             const row = result.rows[0];
             const property_value = row.property_value;
-            const obj = JSON.parse(property_value);
-            return obj;
+            try{
+                const obj = JSON.parse(property_value);
+                return obj;
+            }
+            catch(err){}
+            return property_value;
         }
     }
 
     async set(name: string, value: any): Promise<void> {
+        const strValue = JSON.stringify(value);
         const query = `INSERT INTO context_property (context_id, property_name, property_value) \
-VALUES ('${this.contextId}', '${name}', '${JSON.stringify(value)}') \
+VALUES ('${this.contextId}', '${name}', '${strValue}') \
 ON CONFLICT (context_id, property_name) DO UPDATE \
-SET property_value='${value}'`;
+SET property_value='${strValue}'`;
 
         const result = await this.executeQuey(query);
     }
@@ -56,7 +61,10 @@ SET property_value='${value}'`;
     }
 
     async destroy(): Promise<void> {
-        throw new Error('Method not implemented.');
+        const query = `DELETE FROM context_property WHERE context_id='${this.contextId}'; \
+DELETE FROM context WHERE context_id='${this.contextId}';`;
+
+        const result = await this.executeQuey(query);
     }
 
     private async insertOrUpdateContextRecord(contextId: string, contextType?: string, description?: string): Promise<any> {
