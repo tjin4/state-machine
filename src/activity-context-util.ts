@@ -1,10 +1,12 @@
 import { IActivity, IActivityContext, IActivityManifest, IActivityPropertyManifest, IEvent, IStateContext, IStateMachineContext } from "./types";
-import { InMemoryContext } from './in-memory/context';
+import { Context } from './context';
+import { v4 as uuidv4 } from 'uuid';
 
 export class ActivityContextUtil {
 
     static async createActivityContext(): Promise<IActivityContext> {
-        const activityContext = await InMemoryContext.createContext();
+        const activityContextId = `activity:uuidv4()`;
+        const activityContext = await Context.createContext(activityContextId);
         return activityContext;
     }
 
@@ -118,10 +120,10 @@ export class ActivityContextUtil {
 
         // normalize to dot format
         let expression_ = expression.trim()
-            .replace('[', '.')
-            .replace('"', '')
-            .replace("'", "")
-            .replace(']', '');
+            .replaceAll('[', '.')
+            .replaceAll('"', '')
+            .replaceAll("'", "")
+            .replaceAll(']', '');
 
         const dotIdx = expression_.indexOf('.');
         if (dotIdx <= 0) {
