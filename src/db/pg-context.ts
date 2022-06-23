@@ -11,7 +11,7 @@ export class PgContext implements IContext {
         this.contextId = contextId;
     }
 
-    async init(): Promise<void> {
+    protected async init(): Promise<void> {
         await this.insertOrUpdateContextRecord(this.contextId);
         //await context.set('contextId', contextId);
     }
