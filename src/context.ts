@@ -1,7 +1,7 @@
-import { IContext } from "../types";
+import { IContext } from "./types";
 import { v4 as uuidv4 } from 'uuid';
 
-export class InMemoryContext implements IContext {
+export class Context implements IContext {
 
     readonly contextId: string;
     protected properties: { [key: string]: any } = {};
@@ -20,7 +20,7 @@ export class InMemoryContext implements IContext {
         if(contextId === undefined){
             contextId = uuidv4();
         }
-        const context = new InMemoryContext(contextId);
+        const context = new Context(contextId);
         await context.init();
         return context;
     }

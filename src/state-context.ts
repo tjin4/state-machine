@@ -1,8 +1,8 @@
-import { IStateContext } from "../types";
-import { InMemoryContext } from "./context";
+import { IStateContext } from "./types";
+import { Context } from "./context";
 import { v4 as uuidv4 } from 'uuid';
 
-export class InMemoryStateContext extends InMemoryContext implements IStateContext {
+export class StateContext extends Context implements IStateContext {
 
     readonly stateMachineContextId: string;
     readonly stateId: string;
@@ -21,7 +21,7 @@ export class InMemoryStateContext extends InMemoryContext implements IStateConte
 
     static async createStateConext(stateMachineContextId: string, stateId: string): Promise<IStateContext> {
         const contextId = `${stateMachineContextId}:${stateId}:${uuidv4()}`;
-        const context = new InMemoryStateContext(stateMachineContextId, stateId, contextId);
+        const context = new StateContext(stateMachineContextId, stateId, contextId);
         await context.init();
         return context;
     }

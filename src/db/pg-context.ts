@@ -2,7 +2,7 @@ import { IContext } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import { Pool as pgPool, QueryResult } from 'pg';
 
-export class Context implements IContext {
+export class PgContext implements IContext {
     private static pgPool = new pgPool();
 
     readonly contextId: string;
@@ -21,7 +21,7 @@ export class Context implements IContext {
             contextId = uuidv4();
         }
 
-        const context = new Context(contextId);
+        const context = new PgContext(contextId);
         await context.init();
         return context;
     }
@@ -69,7 +69,7 @@ SET context_type='${contextType ?? ''}', description='${description ?? ''}'`;
     }
 
     private async executeQuey(query: string): Promise<QueryResult<any>> {
-        const client = await Context.pgPool.connect();
+        const client = await PgContext.pgPool.connect();
         try {
             console.debug(`executing query: ${query} ..`);
             const result = await client.query(query);

@@ -1,10 +1,10 @@
 import { IActivity, IActivityContext, IActivityManifest, IActivityPropertyManifest, IEvent, IStateContext, IStateMachineContext } from "./types";
-import { InMemoryContext } from './in-memory/context';
+import { Context } from './context';
 
 export class ActivityContextUtil {
 
     static async createActivityContext(): Promise<IActivityContext> {
-        const activityContext = await InMemoryContext.createContext();
+        const activityContext = await Context.createContext();
         return activityContext;
     }
 

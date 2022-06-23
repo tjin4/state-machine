@@ -1,10 +1,10 @@
 import { IStateMachineContext } from "./types";
-import { InMemoryStateMachineContext } from "./in-memory/state-machine-context";
+import { StateMachineContext } from "./state-machine-context";
 
 export class StateMachineContextFactory {
 
     static async createStateMachineContext(stateMachineDefId: string): Promise<IStateMachineContext> {
-        const context = await InMemoryStateMachineContext.createStateMachineContext(stateMachineDefId);
+        const context = await StateMachineContext.createStateMachineContext(stateMachineDefId);
         return context;
     }
 

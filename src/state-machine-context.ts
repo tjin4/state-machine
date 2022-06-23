@@ -1,9 +1,9 @@
-import { EXEC_STATUS, IContext, IStateContext, IStateMachineContext } from "../types";
-import { InMemoryContext } from "./context";
-import { InMemoryStateContext } from "./state-context";
+import { EXEC_STATUS, IContext, IStateContext, IStateMachineContext } from "./types";
+import { Context } from "./context";
+import { StateContext } from "./state-context";
 import { v4 as uuidv4 } from 'uuid';
 
-export class InMemoryStateMachineContext extends InMemoryContext implements IStateMachineContext {
+export class StateMachineContext extends Context implements IStateMachineContext {
 
     readonly stateMachineDefId: string;
 
@@ -22,7 +22,7 @@ export class InMemoryStateMachineContext extends InMemoryContext implements ISta
 
     static async createStateMachineContext(stateMachineDefId: string): Promise<IStateMachineContext> {
         const contextId = `state-machine:${stateMachineDefId}:${uuidv4()}`;
-        const context = new InMemoryStateMachineContext(stateMachineDefId, contextId);
+        const context = new StateMachineContext(stateMachineDefId, contextId);
         await context.init();
         return context;
     }
@@ -67,7 +67,7 @@ export class InMemoryStateMachineContext extends InMemoryContext implements ISta
             this.stateContext = undefined;
         }
         if (stateId) {
-            this.stateContext = await InMemoryStateContext.createStateConext(this.stateMachineDefId, stateId);
+            this.stateContext = await StateContext.createStateConext(this.stateMachineDefId, stateId);
             return this.stateContext;
         }
     }
