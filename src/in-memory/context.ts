@@ -4,10 +4,12 @@ import { v4 as uuidv4 } from 'uuid';
 export class InMemoryContext implements IContext {
 
     readonly contextId: string;
-    protected _properties: { [key: string]: any } = {};
+    protected properties: { [key: string]: any } = {};
+    protected persistContext?: IContext;
 
-    protected constructor(contextId: string){
+    protected constructor(contextId: string, persistContext?: IContext){
         this.contextId = contextId;
+        this.persistContext = persistContext;
     }
 
     async init(): Promise<void>{
@@ -23,23 +25,38 @@ export class InMemoryContext implements IContext {
         return context;
     }
 
-    async get(key: string): Promise<any> {
-        return this._properties[key];
+    async get(name: string): Promise<any> {
+        if(this.persistContext){
+            const value = await this.persistContext.get(name);
+            this.properties[name] = value;
+        }
+        return this.properties[name];
     }
 
-    async set(key: string, value: any): Promise<void> {
-        this._properties[key] = value;
+    async set(name: string, value: any): Promise<void> {
+        this.properties[name] = value;
+        if(this.persistContext){
+            await this.persistContext.set(name, value);            
+        }
     }
     
     async getProperties(): Promise<Record<string, any>> {
-        return this._properties;
+        if(this.persistContext){
+            this.properties = await this.persistContext.getProperties();
+        }
+        return this.properties;
     }
     
     async flush(): Promise<void> {
-        
+        if(this.persistContext){
+            await this.persistContext.flush();
+        }
     }
 
     async destroy(): Promise<void> {
-        
+        this.properties = {};
+        if(this.persistContext){
+            await this.persistContext.destroy();
+        }
     }
 }
