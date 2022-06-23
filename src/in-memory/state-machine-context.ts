@@ -15,11 +15,15 @@ export class InMemoryStateMachineContext extends InMemoryContext implements ISta
         this.stateMachineDefId = stateMachineDefId;
     }
 
+    async init(): Promise<void> {
+        await super.init();
+        await this.set('stateMachineDefId', this.stateMachineDefId);
+    }
+
     static async createStateMachineContext(stateMachineDefId: string): Promise<IStateMachineContext> {
         const contextId = `state-machine:${stateMachineDefId}:${uuidv4()}`;
         const context = new InMemoryStateMachineContext(stateMachineDefId, contextId);
-        await context.set('contextId', contextId);
-        await context.set('stateMachineDefId', stateMachineDefId);
+        await context.init();
         return context;
     }
 

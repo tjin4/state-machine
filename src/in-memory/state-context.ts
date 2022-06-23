@@ -13,12 +13,16 @@ export class InMemoryStateContext extends InMemoryContext implements IStateConte
         this.stateId = stateId;
     }
 
+    async init(): Promise<void> {
+        await super.init();
+        await this.set('stateMachineContextId', this.stateMachineContextId);
+        await this.set('stateId', this.stateId);
+    }
+
     static async createStateConext(stateMachineContextId: string, stateId: string): Promise<IStateContext> {
         const contextId = `${stateMachineContextId}:${stateId}:${uuidv4()}`;
         const context = new InMemoryStateContext(stateMachineContextId, stateId, contextId);
-        await context.set('contextId', contextId);
-        await context.set('stateMachineContextId', stateMachineContextId);
-        await context.set('stateId', stateId);
+        await context.init();
         return context;
     }
 
