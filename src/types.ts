@@ -13,8 +13,6 @@ export enum EXEC_STATUS {
 export interface IContext {
     readonly contextId: string;
 
-    init(): Promise<void>;
-
     getProperties(): Promise<Record<string, any>>;
 
     get(name: string): Promise<any>;

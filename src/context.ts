@@ -1,5 +1,7 @@
 import { IContext } from "./types";
 import { v4 as uuidv4 } from 'uuid';
+import config from "./config";
+import { PgContext } from "./db/pg-context";
 
 export class Context implements IContext {
 
@@ -12,7 +14,7 @@ export class Context implements IContext {
         this.persistContext = persistContext;
     }
 
-    async init(): Promise<void>{
+    protected async init(): Promise<void>{
         await this.set('contextId', this.contextId);
     }
 
@@ -20,7 +22,13 @@ export class Context implements IContext {
         if(contextId === undefined){
             contextId = uuidv4();
         }
-        const context = new Context(contextId);
+
+        let pgContext: IContext | undefined = undefined;
+        if(config.PersistContext){
+            pgContext = await PgContext.createContext(contextId);
+        }
+
+        const context = new Context(contextId, pgContext);
         await context.init();
         return context;
     }

@@ -1,7 +1,9 @@
 import { EXEC_STATUS, IContext, IStateContext, IStateMachineContext } from "./types";
 import { Context } from "./context";
+import { PgContext } from "./db/pg-context";
 import { StateContext } from "./state-context";
 import { v4 as uuidv4 } from 'uuid';
+import config from "./config";
 
 export class StateMachineContext extends Context implements IStateMachineContext {
 
@@ -10,19 +12,27 @@ export class StateMachineContext extends Context implements IStateMachineContext
     private _stateId?: string;
     private stateContext?: IStateContext;
 
-    protected constructor(stateMachineDefId: string, contextId: string) {
-        super(contextId);
+    protected constructor(stateMachineDefId: string, contextId: string, persistContext?: IContext) {
+        super(contextId, persistContext);
         this.stateMachineDefId = stateMachineDefId;
     }
 
-    async init(): Promise<void> {
+    protected async init(): Promise<void> {
         await super.init();
         await this.set('stateMachineDefId', this.stateMachineDefId);
     }
 
-    static async createStateMachineContext(stateMachineDefId: string): Promise<IStateMachineContext> {
-        const contextId = `state-machine:${stateMachineDefId}:${uuidv4()}`;
-        const context = new StateMachineContext(stateMachineDefId, contextId);
+    static async createStateMachineContext(stateMachineDefId: string, contextId?: string): Promise<IStateMachineContext> {
+        if( contextId === undefined){
+            contextId = `state-machine:${stateMachineDefId}:${uuidv4()}`;
+        }
+
+        let pgContext: IContext | undefined = undefined;
+        if(config.PersistContext){
+            pgContext = await PgContext.createContext(contextId);
+        }
+
+        const context = new StateMachineContext(stateMachineDefId, contextId, pgContext);
         await context.init();
         return context;
     }

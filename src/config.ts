@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 
 export interface IConfigData {
+    PersistContext: boolean;
     DBConnectionString: string;
 }
 
@@ -19,7 +20,8 @@ class Config {
 
     public configData(): IConfigData {
         return {
-            DBConnectionString: this.getEnvVariable('DB_CONNECTION_STRING', true)
+            PersistContext: JSON.parse(this.getEnvVariable('PERSIST_CONTEXT', false, 'true')),
+            DBConnectionString: this.getEnvVariable('DB_CONNECTION_STRING', false)
         };
     }
 
