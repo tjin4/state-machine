@@ -5,10 +5,15 @@ import { Pool as pgPool, QueryResult } from 'pg';
 export class Context implements IContext {
     private static pgPool = new pgPool();
 
-    contextId: string;
+    readonly contextId: string;
 
-    private constructor(contextId: string) {
+    protected constructor(contextId: string) {
         this.contextId = contextId;
+    }
+
+    async init(): Promise<void> {
+        await this.insertOrUpdateContextRecord(this.contextId);
+        //await context.set('contextId', contextId);
     }
 
     static async createContext(contextId?: string): Promise<IContext> {
@@ -17,13 +22,8 @@ export class Context implements IContext {
         }
 
         const context = new Context(contextId);
-        await context.insertOrUpdateContextRecord(contextId);
-        //await context.set('contextId', contextId);
+        await context.init();
         return context;
-    }
-
-    static async loadContext(contextId: string): Promise<IContext> {
-        throw new Error("not implemented");
     }
 
     async getProperties(): Promise<Record<string, any>> {

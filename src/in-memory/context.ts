@@ -10,17 +10,17 @@ export class InMemoryContext implements IContext {
         this.contextId = contextId;
     }
 
+    async init(): Promise<void>{
+        await this.set('contextId', this.contextId);
+    }
+
     static async createContext(contextId?: string): Promise<IContext> {
         if(contextId === undefined){
             contextId = uuidv4();
         }
         const context = new InMemoryContext(contextId);
-        await context.set('contextId', contextId);
+        await context.init();
         return context;
-    }
-
-    static async load(contextId:string): Promise<IContext> {
-        throw new Error ("not implemented");
     }
 
     async get(key: string): Promise<any> {
