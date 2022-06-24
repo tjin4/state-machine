@@ -1,4 +1,5 @@
 import { PgContext } from '../src/db/pg-context';
+import { PgPool } from '../src/db/pg-pool';
 
 describe('Context test', () => {
 
@@ -6,7 +7,7 @@ describe('Context test', () => {
     })
 
     afterAll(async ()=>{
-        await PgContext.endPgPool();
+        await PgPool.destroyInstance();
     })
 
     test('PgContext.create', async () => {

@@ -5,9 +5,10 @@ import path from 'path';
 import { StateMachine } from '../src/state-machine';
 import { PgContext } from '../src/db/pg-context';
 import { EXEC_STATUS } from '../src/types';
+import { PgPool } from '../src/db/pg-pool';
 
 afterAll(async ()=>{
-    await PgContext.endPgPool();
+    await PgPool.destroyInstance();
 })
 
 test('StateMachineEngine.run', async () => {
