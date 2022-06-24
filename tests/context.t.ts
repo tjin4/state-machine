@@ -1,11 +1,8 @@
 import { PgContext } from '../src/db/pg-context';
-import config from '../src/config';
 
 describe('Context test', () => {
 
     beforeAll(async () => {
-        const connStr = config.DBConnectionString;
-        const pwd = process.env['PGPASSWORD'];
     })
 
     afterAll(async ()=>{

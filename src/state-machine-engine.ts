@@ -53,7 +53,6 @@ export class StateMachineEngine {
         const stateMachine = this.stateMachines[contextId];
         if(stateMachine){
             delete this.stateMachines[contextId];
-            await stateMachine.stop();
             await stateMachine.context.destroy();
         }
     }

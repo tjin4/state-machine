@@ -4,25 +4,7 @@ import { readFileSync } from 'fs';
 import path from 'path';
 import { StateMachine } from '../src/state-machine';
 import { PgContext } from '../src/db/pg-context';
-
-function testFunctionConstructor(stateMachine: StateMachine): any{
-    const str = "{return {id: stateMachine.context.stateId()}  ;}";
-    let func = Function('stateMachine', str);
-    const src = func.toString();
-    let ret = func(stateMachine);
-    return ret;
-}
-
-async function testAsyncFunctionConstructor(stateMachine: StateMachine): Promise<any>{
-    // const str = "{return new Promise((resolve, reject)=>{resolve (stateMachine.context.stateId())})   ;}"; //ES2016 and prior
-    const str =  "{return {id: await stateMachine.context.get('stateId')} } "; //"{return await stateMachine.context.get('stateId')  ;}"; //ESNEXT
-
-    let AsyncFunc = Object.getPrototypeOf(async function(){}).constructor;
-    let func = new AsyncFunc('stateMachine', str);
-    let src = func.toString();
-    let ret = await func(stateMachine);
-    return ret;
-}
+import { EXEC_STATUS } from '../src/types';
 
 afterAll(async ()=>{
     await PgContext.endPgPool();
@@ -36,12 +18,19 @@ test('StateMachineEngine.run', async () => {
     engine.broker.register(new TestActivityProvider());
 
     const stateMachine = await engine.createStateMachine(doc, {user: 'tao'}, true);
-    // await testAsyncFunctionConstructor(stateMachine);
 
     for (let i = 0; i < 1; i++) {
         await engine.runStateMachine(stateMachine.context.contextId);
+        console.log(JSON.stringify(stateMachine.context, null, 2));
+        expect(await stateMachine.context.getExecStatus()).toEqual(EXEC_STATUS.RUNNING);
+        expect(await stateMachine.context.getStateId()).toEqual('state1');
+
         await engine.dispatchEvent({ eventId: 'event1', stateMachineId:stateMachine.context.contextId, properties: {} });
+        console.log(JSON.stringify(stateMachine.context, null, 2));
+
         await engine.dispatchEvent({ eventId: 'event3', stateMachineId:stateMachine.context.contextId, properties: {} });
+        console.log(JSON.stringify(stateMachine.context, null, 2));
+
         await engine.stopStateMachine(stateMachine.context.contextId);
         console.log(JSON.stringify(stateMachine.context, null, 2));
     }

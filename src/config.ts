@@ -1,9 +1,18 @@
 import dotenv from 'dotenv';
 import fs from 'fs';
 
+export interface IPgConfig {
+    user: string,
+    password: string,
+    host: string,
+    port: number,
+    database: string
+}
+
 export interface IConfigData {
     PersistContext: boolean;
-    DBConnectionString: string;
+    //DBConnectionString: string;
+    PgConfig: IPgConfig;
 }
 
 class Config {
@@ -21,7 +30,14 @@ class Config {
     public configData(): IConfigData {
         return {
             PersistContext: JSON.parse(this.getEnvVariable('PERSIST_CONTEXT', false, 'true')),
-            DBConnectionString: this.getEnvVariable('DB_CONNECTION_STRING', false)
+            // DBConnectionString: this.getEnvVariable('DB_CONNECTION_STRING', false),
+            PgConfig: {
+                user: this.getEnvVariable('PGUSER', true),
+                password: this.getEnvVariable('PGPASSWORD', true),
+                host: this.getEnvVariable('PGHOST', true),
+                port: JSON.parse(this.getEnvVariable('PGPORT', true)),
+                database: this.getEnvVariable('PGDATABASE', true)
+            }
         };
     }
 
@@ -35,6 +51,7 @@ class Config {
         }
         return val;
     }
+
 }
 
 const config = new Config();

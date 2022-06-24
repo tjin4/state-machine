@@ -1,9 +1,10 @@
 import { IContext } from '../types';
 import { v4 as uuidv4 } from 'uuid';
-import { Pool as pgPool, QueryResult } from 'pg';
+import { Pool as PgPool, QueryResult } from 'pg';
+import config from '../config';
 
 export class PgContext implements IContext {
-    private static pgPool = new pgPool();
+    private static _pgPool ?: PgPool;
 
     readonly contextId: string;
 
@@ -26,8 +27,17 @@ export class PgContext implements IContext {
         return context;
     }
 
+    static pgPool(): PgPool {
+        if(PgContext._pgPool === undefined){
+            PgContext._pgPool = new PgPool(config.PgConfig);
+        }
+        return PgContext._pgPool;
+    }
+
     static async endPgPool(): Promise<void> {
-        await PgContext.pgPool.end();
+        if(PgContext._pgPool){
+            await PgContext._pgPool.end();
+        }
     }
 
     async getProperties(): Promise<Record<string, any>> {
@@ -89,7 +99,7 @@ SET context_type='${contextType ?? ''}', description='${description ?? ''}'`;
     private async executeQuey(query: string): Promise<QueryResult<any>> {
         try {
             console.debug(`executing query: ${query} ..`);
-            const result = await PgContext.pgPool.query(query);
+            const result = await PgContext.pgPool().query(query);
             console.debug(`query completed, command=${result.command}, rowCount=${result.rowCount}`);
             return result;
         }
