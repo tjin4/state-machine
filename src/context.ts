@@ -10,23 +10,23 @@ export class Context implements IContext {
     protected persistContext?: IContext;
     protected immutableProps: Record<string, boolean> = {};
 
-    protected constructor(contextId: string, persistContext?: IContext){
+    protected constructor(contextId: string, persistContext?: IContext) {
         this.contextId = contextId;
         this.properties['contextId'] = contextId;
         this.persistContext = persistContext;
     }
 
-    protected async init(): Promise<void>{
+    protected async init(): Promise<void> {
         this.immutableProps['contextId'] = true;
     }
 
     static async createContext(contextId?: string): Promise<IContext> {
-        if(contextId === undefined){
+        if (contextId === undefined) {
             contextId = uuidv4();
         }
 
         let pgContext: IContext | undefined = undefined;
-        if(config.PersistContext){
+        if (config.PersistContext) {
             pgContext = await PgContext.createContext(contextId);
         }
 
@@ -36,7 +36,7 @@ export class Context implements IContext {
     }
 
     async get(name: string): Promise<any> {
-        if(this.persistContext){
+        if (this.persistContext) {
             const value = await this.persistContext.get(name);
             this.properties[name] = value;
         }
@@ -44,32 +44,39 @@ export class Context implements IContext {
     }
 
     async set(name: string, value: any): Promise<void> {
-        if(this.immutableProps[name]){
+        if (this.immutableProps[name]) {
             return;
         }
 
         this.properties[name] = value;
-        if(this.persistContext){
-            await this.persistContext.set(name, value);            
+        if (this.persistContext) {
+            await this.persistContext.set(name, value);
         }
     }
-    
+
     async getProperties(): Promise<Record<string, any>> {
-        if(this.persistContext){
+        if (this.persistContext) {
             this.properties = await this.persistContext.getProperties();
         }
         return this.properties;
     }
-    
+
     async flush(): Promise<void> {
-        if(this.persistContext){
+        if (this.persistContext) {
             await this.persistContext.flush();
+        }
+    }
+
+    async reset(): Promise<void> {
+        this.properties = {};
+        if(this.persistContext) {
+            await this.persistContext.reset();
         }
     }
 
     async destroy(): Promise<void> {
         this.properties = {};
-        if(this.persistContext){
+        if (this.persistContext) {
             await this.persistContext.destroy();
         }
     }

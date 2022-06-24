@@ -23,6 +23,8 @@ export interface IContext {
      */
     flush(): Promise<void>;
 
+    reset(): Promise<void>;
+
     destroy(): Promise<void>;
 }
 

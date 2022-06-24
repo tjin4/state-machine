@@ -60,6 +60,12 @@ SET property_value='${strValue}'`;
         throw new Error('Method not implemented.');
     }
 
+    async reset(): Promise<void> {
+        const query = `DELETE FROM context_property WHERE context_id='${this.contextId}';`;
+
+        const result = await this.executeQuey(query);
+    }
+
     async destroy(): Promise<void> {
         const query = `DELETE FROM context_property WHERE context_id='${this.contextId}'; \
 DELETE FROM context WHERE context_id='${this.contextId}';`;

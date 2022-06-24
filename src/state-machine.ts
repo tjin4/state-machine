@@ -45,6 +45,7 @@ export class StateMachine {
      */
     public async stop() {
         await this.transitToState(undefined);
+        await this.context.reset();
         await this.context.setExecStatus(EXEC_STATUS.STOPPED);
     }
 
