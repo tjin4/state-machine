@@ -55,7 +55,7 @@ export class SysActivityProvider implements IActivityProvider {
                 if (defDoc === undefined) {
                     return { eventId: 'sys-event.failure', stateMachineId: stateMachineContext.contextId, properties: { "info": "missing state-machine-definition" } };
                 }
-                const stateMachine = this.engine.createStateMachine(defDoc, false);
+                const stateMachine = this.engine.createStateMachine(defDoc, {}, false);
                 (await stateMachineContext.currentStateContext())?.set('new-state-machine-id', (await stateMachine).context.contextId);
                 break;
             }

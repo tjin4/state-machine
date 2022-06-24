@@ -13,15 +13,16 @@ export class StateMachineEngine {
         this.broker = new ActivityBroker();
     }
 
-    async createStateMachine(stateMachineDefDoc: string, autoStart: boolean): Promise<StateMachine> {
+    async createStateMachine(stateMachineDefDoc: string, startupArgs: any, autoStart: boolean): Promise<StateMachine> {
 
         const def = new StateMachineDefinition();
         def.load(stateMachineDefDoc);
-        if(!def.doc){
+        if (!def.doc) {
             throw new Error('StateMachineDefinition is invalid');
         }
 
         const context = await StateMachineContext.createStateMachineContext(def.doc.definitionId);
+        await context.set('startupArgs', startupArgs);
         const stateMachine = new StateMachine(def, this.broker, context);
         this.stateMachines[context.contextId] = stateMachine;
 
@@ -46,6 +47,15 @@ export class StateMachineEngine {
 
     async stopStateMachine(contextId: string) {
         await this.findStateMachine(contextId)?.stop();
+    }
+
+    async removeStateMachine(contextId: string) {
+        const stateMachine = this.stateMachines[contextId];
+        if(stateMachine){
+            delete this.stateMachines[contextId];
+            stateMachine.stop();
+            stateMachine.context.destroy();
+        }
     }
 
     async dispatchEvent(event: IEvent): Promise<boolean | undefined> {

@@ -30,7 +30,7 @@ test('StateMachineEngine.run', async () => {
     const engine = new StateMachineEngine();
     engine.broker.register(new TestActivityProvider());
 
-    const stateMachine = await engine.createStateMachine(doc, true);
+    const stateMachine = await engine.createStateMachine(doc, {user: 'tao'}, true);
     // await testAsyncFunctionConstructor(stateMachine);
 
     for (let i = 0; i < 1; i++) {
@@ -40,4 +40,5 @@ test('StateMachineEngine.run', async () => {
         await engine.stopStateMachine(stateMachine.context.contextId);
         console.log(JSON.stringify(stateMachine.context, null, 2));
     }
+    await engine.removeStateMachine(stateMachine.context.contextId);
 });
