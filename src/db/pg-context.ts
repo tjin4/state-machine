@@ -26,6 +26,10 @@ export class PgContext implements IContext {
         return context;
     }
 
+    static async endPgPool(): Promise<void> {
+        await PgContext.pgPool.end();
+    }
+
     async getProperties(): Promise<Record<string, any>> {
         throw new Error("not implemented");
     }
@@ -34,14 +38,14 @@ export class PgContext implements IContext {
         const query = `SELECT property_value from context_property WHERE context_id='${this.contextId}' AND property_name='${name}'`;
 
         const result = await this.executeQuey(query);
-        if(result.rowCount === 1){
+        if (result.rowCount === 1) {
             const row = result.rows[0];
             const property_value = row.property_value;
-            try{
+            try {
                 const obj = JSON.parse(property_value);
                 return obj;
             }
-            catch(err){}
+            catch (err) { }
             return property_value;
         }
     }
@@ -83,19 +87,15 @@ SET context_type='${contextType ?? ''}', description='${description ?? ''}'`;
     }
 
     private async executeQuey(query: string): Promise<QueryResult<any>> {
-        const client = await PgContext.pgPool.connect();
         try {
             console.debug(`executing query: ${query} ..`);
-            const result = await client.query(query);
+            const result = await PgContext.pgPool.query(query);
             console.debug(`query completed, command=${result.command}, rowCount=${result.rowCount}`);
             return result;
         }
-        catch(err){
+        catch (err) {
             console.error(err);
             throw err;
-        }
-        finally {
-            client.release();
         }
     }
 

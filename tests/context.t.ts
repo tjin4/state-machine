@@ -8,6 +8,10 @@ describe('Context test', () => {
         const pwd = process.env['PGPASSWORD'];
     })
 
+    afterAll(async ()=>{
+        await PgContext.endPgPool();
+    })
+
     test('PgContext.create', async () => {
         const context = await PgContext.createContext();
         try {

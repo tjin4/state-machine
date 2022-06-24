@@ -3,6 +3,7 @@ import { TestActivityProvider } from './test-activity-provider';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { StateMachine } from '../src/state-machine';
+import { PgContext } from '../src/db/pg-context';
 
 function testFunctionConstructor(stateMachine: StateMachine): any{
     const str = "{return {id: stateMachine.context.stateId()}  ;}";
@@ -22,6 +23,10 @@ async function testAsyncFunctionConstructor(stateMachine: StateMachine): Promise
     let ret = await func(stateMachine);
     return ret;
 }
+
+afterAll(async ()=>{
+    await PgContext.endPgPool();
+})
 
 test('StateMachineEngine.run', async () => {
  
