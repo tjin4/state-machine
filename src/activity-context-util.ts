@@ -1,6 +1,4 @@
 import { CONTEXT_TYPE, IActivity, IActivityContext, IActivityManifest, IActivityPropertyManifest, IEvent, IStateContext, IStateMachineContext } from "./types";
-import { Context } from './context';
-import { v4 as uuidv4 } from 'uuid';
 
 export class ActivityContextUtil {
 

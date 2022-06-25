@@ -32,7 +32,7 @@ export interface IContext {
     readonly contextType: CONTEXT_TYPE;
     readonly description: string;
 
-    // init(initReadOnlyProps: Record<string, any>): Promise<void>;
+    init(initReadOnlyProps: Record<string, any>): Promise<void>;
 
     getProperties(): Promise<Record<string, any>>;
 

@@ -2,7 +2,7 @@ import { IEvent } from "./types";
 import { StateMachineDefinition } from "./state-machine-definition";
 import { StateMachine } from "./state-machine";
 import { ActivityBroker } from "./activity-broker";
-import { StateMachineContext } from "./state-machine-context";
+import { ContextManager } from "./context-manager";
 
 export class StateMachineEngine {
 
@@ -21,7 +21,7 @@ export class StateMachineEngine {
             throw new Error('StateMachineDefinition is invalid');
         }
 
-        const context = await StateMachineContext.createStateMachineContext(def.doc.definitionId);
+        const context = await ContextManager.instance.createStateMachineContext(def.doc.definitionId);
         await context.set('startupArgs', startupArgs);
         const stateMachine = new StateMachine(def, this.broker, context);
         this.stateMachines[context.contextId] = stateMachine;
