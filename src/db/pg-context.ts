@@ -5,7 +5,7 @@ import config from '../config';
 
 export class PgContextManager implements IContextManager {
 
-    static instance: PgContextManager = new PgContextManager();
+    static readonly instance: PgContextManager = new PgContextManager();
 
     async getContexts(contextType: CONTEXT_TYPE): Promise<IContext[]> {
         const query = `select context_id, context_type, description from context where context_type='${contextType}'`;
@@ -34,7 +34,7 @@ export class PgContextManager implements IContextManager {
         return context;
     }
 
-    async createContext(contextId: string | undefined, contextType: CONTEXT_TYPE, description: string): Promise<IContext> {
+    async createContext(contextId: string | undefined, contextType: CONTEXT_TYPE, description: string, initReadOnlyProps?: Record<string, any>): Promise<IContext> {
         if (contextId === undefined) {
             contextId = `${contextType}:${uuidv4()}`;
         }
@@ -47,11 +47,15 @@ VALUES ('${contextId}', '${contextType}', '${description ?? ''}')`;
             throw new Error('Internal error, create context result rowCount is not 1');
         }
         const context = new PgContext(contextId, contextType, description);
+        if(initReadOnlyProps){
+            await context.init(initReadOnlyProps);
+        }
         return context;
     }
 
     async deleteContext(contextId: string): Promise<number> {
-        const query = `DELETE from context where context_id='${contextId}'`;
+        const query = `DELETE FROM context_property WHERE context_id='${contextId}'; \
+DELETE FROM context WHERE context_id='${contextId}';`;
         const result = await PgPool.getInstance().executeQuey(query);
         return result.rowCount;
     }
@@ -67,14 +71,20 @@ class PgContext implements IContext {
     readonly contextType: CONTEXT_TYPE;
     readonly description: string;
 
+    private readOnlyPropNames: Record<string, boolean> = {};
+
     constructor(contextId: string, contextType: CONTEXT_TYPE, description: string) {
         this.contextId = contextId;
         this.contextType = contextType;
         this.description = description;
     }
 
-    // async init(immutableProps?: Record<string, any>): Promise<void> {
-    // }
+    async init(initReadOnlyProps: Record<string, any>): Promise<void> {
+        for (const name in initReadOnlyProps) {
+            await this.set(name, initReadOnlyProps[name]);
+            this.readOnlyPropNames[name] = true;
+        }
+    }
 
     async getProperties(): Promise<Record<string, any>> {
         throw new Error("not implemented");
@@ -97,6 +107,10 @@ class PgContext implements IContext {
     }
 
     async set(name: string, value: any): Promise<void> {
+        if (this.readOnlyPropNames[name]) {
+            throw new Error(`Trying to set readonly property '${name}'`);
+        }
+
         const strValue = JSON.stringify(value);
         const query = `INSERT INTO context_property (context_id, property_name, property_value) \
 VALUES ('${this.contextId}', '${name}', '${strValue}') \
@@ -106,10 +120,6 @@ SET property_value='${strValue}'`;
         const result = await PgPool.getInstance().executeQuey(query);
     }
 
-    async flush(): Promise<void> {
-        throw new Error('Method not implemented.');
-    }
-
     async reset(): Promise<void> {
         const query = `DELETE FROM context_property WHERE context_id='${this.contextId}';`;
 
@@ -117,14 +127,11 @@ SET property_value='${strValue}'`;
     }
 
     async destroy(): Promise<void> {
-        if(config.TestConfig.skip_destroy_context){
+        if (config.TestConfig.skip_destroy_context) {
             return;
         }
 
-        const query = `DELETE FROM context_property WHERE context_id='${this.contextId}'; \
-DELETE FROM context WHERE context_id='${this.contextId}';`;
-
-        const result = await PgPool.getInstance().executeQuey(query);
+        await PgContextManager.instance.deleteContext(this.contextId);
     }
 
 }

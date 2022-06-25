@@ -22,7 +22,7 @@ export interface IContextManager {
 
     getContext(contextId: string): Promise<IContext | null>;
 
-    createContext(contextId: string | undefined, contextType: CONTEXT_TYPE, description: string): Promise<IContext>;
+    createContext(contextId: string | undefined, contextType: CONTEXT_TYPE, description: string, initReadOnlyProps?: Record<string, any>): Promise<IContext>;
 
     deleteContext(contextId: string): Promise<number>;
 }
@@ -32,15 +32,12 @@ export interface IContext {
     readonly contextType: CONTEXT_TYPE;
     readonly description: string;
 
+    // init(initReadOnlyProps: Record<string, any>): Promise<void>;
+
     getProperties(): Promise<Record<string, any>>;
 
     get(name: string): Promise<any>;
     set(name: string, value: any): Promise<void>;
-
-    /**
-     * persist dirty properities in getProperties() dictionary
-     */
-    flush(): Promise<void>;
 
     reset(): Promise<void>;
 

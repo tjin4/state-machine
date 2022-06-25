@@ -71,12 +71,6 @@ export class Context implements IContext {
         return this.properties;
     }
 
-    async flush(): Promise<void> {
-        if (this.persistContext) {
-            await this.persistContext.flush();
-        }
-    }
-
     async reset(): Promise<void> {
         this.properties = {};
         if (this.persistContext) {
