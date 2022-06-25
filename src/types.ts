@@ -47,9 +47,9 @@ export interface IContext {
     destroy(): Promise<void>;
 }
 
-export type IActivityContext = IContext;
-// export interface IActivityContext extends IContext {
-// }
+export interface IActivityContext extends IContext {
+    readonly activityId: string;
+}
 
 /**
  * Represent a context local to the current state

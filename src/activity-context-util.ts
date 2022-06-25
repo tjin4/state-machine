@@ -4,12 +4,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 export class ActivityContextUtil {
 
-    static async createActivityContext(): Promise<IActivityContext> {
-        const activityContextId = `${CONTEXT_TYPE.ACTIVITY}:${uuidv4()}`;
-        const activityContext = await Context.createContext(activityContextId, CONTEXT_TYPE.ACTIVITY, '');
-        return activityContext;
-    }
-
     static async evalInputProperties(activity: IActivity, activityManifest: IActivityManifest, activityContext: IActivityContext, stateMachineContext: IStateMachineContext, event?: IEvent): Promise<void> {
         //validate activity.inputPropertiesExpressionEvalMode
         const inputPropertiesEvalMode = activity.inputPropertiesExpressionEvalMode ?? 'async';

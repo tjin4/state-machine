@@ -15,6 +15,7 @@ export class StateMachineContext extends Context implements IStateMachineContext
     protected constructor(stateMachineDefId: string, contextId: string, persistContext?: IContext) {
         super(contextId, CONTEXT_TYPE.STATE_MACHINE, '', persistContext);
         this.stateMachineDefId = stateMachineDefId;
+        this.initImmutableProps['stateMachineDefId'] = stateMachineDefId;
     }
 
     static async createStateMachineContext(stateMachineDefId: string, contextId?: string): Promise<IStateMachineContext> {
@@ -28,10 +29,7 @@ export class StateMachineContext extends Context implements IStateMachineContext
         }
 
         const context = new StateMachineContext(stateMachineDefId, contextId, pgContext);
-        const initImmutableProps = {
-            stateMachineDefId: stateMachineDefId,
-        };
-        await context.init(initImmutableProps);
+        await context.init();
         return context;
     }
 

@@ -13,6 +13,8 @@ export class StateContext extends Context implements IStateContext {
         super(contextId, CONTEXT_TYPE.STATE_LOCAL, '', persistContext);
         this.stateMachineContextId = stateMachineContextId;
         this.stateId = stateId;
+        this.initImmutableProps['stateMachineContextId'] = stateMachineContextId;
+        this.initImmutableProps['stateId'] = stateId;
     }
 
     static async createStateConext(stateMachineContextId: string, stateId: string, contextId?: string): Promise<IStateContext> {
@@ -26,11 +28,7 @@ export class StateContext extends Context implements IStateContext {
         }
 
         const context = new StateContext(stateMachineContextId, stateId, contextId, pgContext);
-        const initImmutableProps = {
-            stateMachineContextId: stateMachineContextId,
-            stateId: stateId
-        };
-        await context.init(initImmutableProps);
+        await context.init();
         return context;
     }
 

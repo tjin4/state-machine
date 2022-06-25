@@ -1,5 +1,6 @@
 import { IEvent, IStateMachineContext, IActivity, IActivityContext, IActivityProvider, IActivityBroker, IActivityManifest } from "./types";
 import { ActivityContextUtil } from "./activity-context-util";
+import { ActivityContext } from "./activity-context";
 
 export class ActivityBroker implements IActivityBroker {
 
@@ -27,7 +28,7 @@ export class ActivityBroker implements IActivityBroker {
             console.log(`executing activity - ${JSON.stringify(activity)}`);
 
             const activityManifest = this.activityManifests[activity.activityId];
-            const activityContext = await ActivityContextUtil.createActivityContext();
+            const activityContext = await ActivityContext.createActivityConext(activity.activityId);
 
             await ActivityContextUtil.evalInputProperties(activity, activityManifest, activityContext, stateMachineContext, event);
             
