@@ -1,29 +1,80 @@
-import { IContext } from '../types';
+import { CONTEXT_TYPE, IContext, IContextManager } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import { PgPool } from './pg-pool';
+import config from '../config';
 
-export class PgContext implements IContext {
+export class PgContextManager implements IContextManager {
 
-    readonly contextId: string;
+    static instance: PgContextManager = new PgContextManager();
 
-    protected constructor(contextId: string) {
-        this.contextId = contextId;
-    }
+    async getContexts(contextType: CONTEXT_TYPE): Promise<IContext[]> {
+        const query = `select context_id, context_type, description from context where context_type='${contextType}'`;
 
-    protected async init(): Promise<void> {
-        await this.insertOrUpdateContextRecord(this.contextId);
-        //await context.set('contextId', contextId);
-    }
-
-    static async createContext(contextId?: string): Promise<IContext> {
-        if (contextId === undefined) {
-            contextId = uuidv4();
+        const contexts: IContext[] = [];
+        const result = await PgPool.getInstance().executeQuey(query);
+        for (let i = 0; i < result.rowCount; i++) {
+            const row = result.rows[i];
+            const context = new PgContext(row[0], row[1], row[2]);
+            contexts.push(context);
         }
 
-        const context = new PgContext(contextId);
-        await context.init();
+        return contexts;
+    }
+
+    async getContext(contextId: string): Promise<IContext | null> {
+        const query = `select context_id, context_type, description from context where context_id='${contextId}'`;
+
+        let context: IContext | null = null;
+        const result = await PgPool.getInstance().executeQuey(query);
+        if (result.rowCount === 1) {
+            const row = result.rows[0];
+            context = new PgContext(row[0], row[1], row[2]);
+        }
+
         return context;
     }
+
+    async createContext(contextId: string | undefined, contextType: CONTEXT_TYPE, description: string): Promise<IContext> {
+        if (contextId === undefined) {
+            contextId = `${contextType}:${uuidv4()}`;
+        }
+
+        const query = `INSERT INTO context (context_id, context_type, description) \
+VALUES ('${contextId}', '${contextType}', '${description ?? ''}')`;
+
+        const result = await PgPool.getInstance().executeQuey(query);
+        if (result.rowCount !== 1) {
+            throw new Error('Internal error, create context result rowCount is not 1');
+        }
+        const context = new PgContext(contextId, contextType, description);
+        return context;
+    }
+
+    async deleteContext(contextId: string): Promise<number> {
+        const query = `DELETE from context where context_id='${contextId}'`;
+        const result = await PgPool.getInstance().executeQuey(query);
+        return result.rowCount;
+    }
+
+}
+
+/**
+ * 
+ */
+class PgContext implements IContext {
+
+    readonly contextId: string;
+    readonly contextType: CONTEXT_TYPE;
+    readonly description: string;
+
+    constructor(contextId: string, contextType: CONTEXT_TYPE, description: string) {
+        this.contextId = contextId;
+        this.contextType = contextType;
+        this.description = description;
+    }
+
+    // async init(immutableProps?: Record<string, any>): Promise<void> {
+    // }
 
     async getProperties(): Promise<Record<string, any>> {
         throw new Error("not implemented");
@@ -66,17 +117,12 @@ SET property_value='${strValue}'`;
     }
 
     async destroy(): Promise<void> {
+        if(config.TestConfig.skip_destroy_context){
+            return;
+        }
+
         const query = `DELETE FROM context_property WHERE context_id='${this.contextId}'; \
 DELETE FROM context WHERE context_id='${this.contextId}';`;
-
-        const result = await PgPool.getInstance().executeQuey(query);
-    }
-
-    private async insertOrUpdateContextRecord(contextId: string, contextType?: string, description?: string): Promise<any> {
-        const query = `INSERT INTO context (context_id, context_type, description) \
-VALUES ('${contextId}', '${contextType ?? ''}', '${description ?? ''}') \
-ON CONFLICT (context_id) DO UPDATE \
-SET context_type='${contextType ?? ''}', description='${description ?? ''}'`;
 
         const result = await PgPool.getInstance().executeQuey(query);
     }

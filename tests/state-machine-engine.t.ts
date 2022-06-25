@@ -3,7 +3,6 @@ import { TestActivityProvider } from './test-activity-provider';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { StateMachine } from '../src/state-machine';
-import { PgContext } from '../src/db/pg-context';
 import { EXEC_STATUS } from '../src/types';
 import { PgPool } from '../src/db/pg-pool';
 
@@ -32,7 +31,7 @@ test('StateMachineEngine.run', async () => {
         await engine.dispatchEvent({ eventId: 'event3', stateMachineId:stateMachine.context.contextId, properties: {} });
         console.log(JSON.stringify(stateMachine.context, null, 2));
 
-        await engine.stopStateMachine(stateMachine.context.contextId);
+        await engine.pauseStateMachine(stateMachine.context.contextId);
         console.log(JSON.stringify(stateMachine.context, null, 2));
     }
     await engine.removeStateMachine(stateMachine.context.contextId);

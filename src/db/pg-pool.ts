@@ -23,6 +23,7 @@ export class PgPool {
     static async destroyInstance(): Promise<void> {
         if (PgPool._instance !== undefined) {
             await PgPool._instance.destroy();
+            PgPool._instance = undefined;
         }
     }
 

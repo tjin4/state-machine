@@ -1,37 +1,47 @@
-import { IContext } from "./types";
+import { CONTEXT_TYPE, IContext } from "./types";
 import { v4 as uuidv4 } from 'uuid';
 import config from "./config";
-import { PgContext } from "./db/pg-context";
+import { PgContextManager } from "./db/pg-context";
 
 export class Context implements IContext {
 
     readonly contextId: string;
+    readonly contextType: CONTEXT_TYPE;
+    readonly description: string;
+
     protected properties: { [key: string]: any } = {};
     protected persistContext?: IContext;
     protected immutableProps: Record<string, boolean> = {};
 
-    protected constructor(contextId: string, persistContext?: IContext) {
+    protected constructor(contextId: string, contextType: CONTEXT_TYPE, description: string, persistContext?: IContext) {
         this.contextId = contextId;
-        this.properties['contextId'] = contextId;
+        this.contextType = contextType;
+        this.description = description;
+
         this.persistContext = persistContext;
     }
 
-    protected async init(): Promise<void> {
-        this.immutableProps['contextId'] = true;
+    protected async init(initImmutableProps: Record<string, any> = {}): Promise<void> {
+        initImmutableProps['contextId'] = this.contextId;
+        for(const name in initImmutableProps){
+            await this.set(name, initImmutableProps[name]);
+            this.immutableProps[name] = true;
+        }
     }
 
-    static async createContext(contextId?: string): Promise<IContext> {
+    static async createContext(contextId: string | undefined, contextType: CONTEXT_TYPE, description: string): Promise<IContext> {
         if (contextId === undefined) {
-            contextId = uuidv4();
+            contextId = `${contextType}:${uuidv4()}`;
         }
 
         let pgContext: IContext | undefined = undefined;
         if (config.PersistContext) {
-            pgContext = await PgContext.createContext(contextId);
+            pgContext = await PgContextManager.instance.createContext(contextId, contextType, description);
         }
 
-        const context = new Context(contextId, pgContext);
-        await context.init();
+        const context = new Context(contextId, contextType, description, pgContext);
+        const initImmutableProps = {}; 
+        await context.init(initImmutableProps);
         return context;
     }
 
@@ -69,7 +79,7 @@ export class Context implements IContext {
 
     async reset(): Promise<void> {
         this.properties = {};
-        if(this.persistContext) {
+        if (this.persistContext) {
             await this.persistContext.reset();
         }
     }

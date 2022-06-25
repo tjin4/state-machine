@@ -16,6 +16,11 @@ export class TestActivityProvider implements IActivityProvider {
                     name: 'output-prop1',
                     description: '',
                     isOptional: true
+                },
+                {
+                    name: 'output-prop2',
+                    description: '',
+                    isOptional: true
                 }
             ]
         }
@@ -26,6 +31,7 @@ export class TestActivityProvider implements IActivityProvider {
         // }
         let retEvt = await activityContext.get('event'); //activity.config?.['event'];
         await activityContext.set('output-prop1', stateMachineContext.stateId());
+        await activityContext.set('output-prop2', stateMachineContext.stateId());
         console.log(`inside test-activity:return-event, returning ${JSON.stringify(retEvt)}`);
         return retEvt;
     }

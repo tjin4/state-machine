@@ -1,6 +1,6 @@
-import { EXEC_STATUS, IContext, IStateContext, IStateMachineContext } from "./types";
+import { EXEC_STATUS, IContext, IStateContext, IStateMachineContext, CONTEXT_TYPE } from "./types";
 import { Context } from "./context";
-import { PgContext } from "./db/pg-context";
+import { PgContextManager } from "./db/pg-context";
 import { StateContext } from "./state-context";
 import { v4 as uuidv4 } from 'uuid';
 import config from "./config";
@@ -13,28 +13,25 @@ export class StateMachineContext extends Context implements IStateMachineContext
     private stateContext?: IStateContext;
 
     protected constructor(stateMachineDefId: string, contextId: string, persistContext?: IContext) {
-        super(contextId, persistContext);
+        super(contextId, CONTEXT_TYPE.STATE_MACHINE, '', persistContext);
         this.stateMachineDefId = stateMachineDefId;
-    }
-
-    protected async init(): Promise<void> {
-        await super.init();
-        await this.set('stateMachineDefId', this.stateMachineDefId);
-        this.immutableProps['stateMachineDefId'] = true;
     }
 
     static async createStateMachineContext(stateMachineDefId: string, contextId?: string): Promise<IStateMachineContext> {
         if( contextId === undefined){
-            contextId = `state-machine:${stateMachineDefId}:${uuidv4()}`;
+            contextId = `${CONTEXT_TYPE.STATE_MACHINE}:${stateMachineDefId}:${uuidv4()}`;
         }
 
         let pgContext: IContext | undefined = undefined;
         if(config.PersistContext){
-            pgContext = await PgContext.createContext(contextId);
+            pgContext = await PgContextManager.instance.createContext(contextId, CONTEXT_TYPE.STATE_MACHINE, '');
         }
 
         const context = new StateMachineContext(stateMachineDefId, contextId, pgContext);
-        await context.init();
+        const initImmutableProps = {
+            stateMachineDefId: stateMachineDefId,
+        };
+        await context.init(initImmutableProps);
         return context;
     }
 
@@ -70,6 +67,14 @@ export class StateMachineContext extends Context implements IStateMachineContext
 
     async currentStateContext(): Promise<IStateContext | undefined> {
         return this.stateContext;
+    }
+
+    async destroy(): Promise<void> {
+        if (this.stateContext) {
+            this.stateContext.destroy();
+            this.stateContext = undefined;
+        }
+        await super.destroy();
     }
 
     private async setStateContext(stateId?: string): Promise<IStateContext | undefined> {

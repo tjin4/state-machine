@@ -10,8 +10,27 @@ export enum EXEC_STATUS {
     STOPPED = 'STOPPED'
 }
 
+export enum CONTEXT_TYPE {
+    STATE_MACHINE = 'state-machine',
+    STATE_LOCAL = 'state-local',
+    ACTIVITY = 'activity'
+}
+
+export interface IContextManager {
+
+    getContexts(contextType: CONTEXT_TYPE): Promise<IContext[]>;
+
+    getContext(contextId: string): Promise<IContext | null>;
+
+    createContext(contextId: string | undefined, contextType: CONTEXT_TYPE, description: string): Promise<IContext>;
+
+    deleteContext(contextId: string): Promise<number>;
+}
+
 export interface IContext {
     readonly contextId: string;
+    readonly contextType: CONTEXT_TYPE;
+    readonly description: string;
 
     getProperties(): Promise<Record<string, any>>;
 
@@ -27,6 +46,10 @@ export interface IContext {
 
     destroy(): Promise<void>;
 }
+
+export type IActivityContext = IContext;
+// export interface IActivityContext extends IContext {
+// }
 
 /**
  * Represent a context local to the current state
@@ -115,10 +138,6 @@ export interface IStateMachineDefinition {
     states: Record<string, IStateDefinition>;
     stateTransitions: Record<string, Record<string, string>>;
 }
-
-export type IActivityContext = IContext;
-// export interface IActivityContext extends IContext {
-// }
 
 export interface IActivityPropertyManifest {
     name: string;

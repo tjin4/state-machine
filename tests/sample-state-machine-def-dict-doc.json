@@ -1,6 +1,6 @@
 {
     "$schema": "urn:x-bloomberg-com:app-portal:state-machine-definition-dictionary",
-    "definitionId": "a-sample-statemachine-definition",
+    "definitionId": "statemachine-example-1",
     "description": "",
     "initStateId": "state1",
     "states": {
@@ -26,7 +26,8 @@
                     "event": "{'eventId': 'event-from-entry-activity', 'properties': { 'info': `${await state.get('stateId')}  ${event.eventId}`} }"
                 },
                 "outputPropertiesExpression": {
-                    "output-prop1": "state['output-from-test-activity']"
+                    "output-prop1": "state['output-from-test-activity']",
+                    "output-prop2": "local['output2-from-test-activity']"
                 }
             }
         },
