@@ -14,8 +14,8 @@ a node js state machine implementation
 //
 npm install
 
-//
-npm run restart-db
+// start docker environment - postgres (5430), kafka (9092)
+npm run start-docker
 
 //
 npm run build
