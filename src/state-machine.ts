@@ -4,15 +4,12 @@ import { ActivityBroker } from './activity-broker';
 
 export class StateMachine {
 
-    private activityBroker: ActivityBroker;
-
     private stateMachineDef: StateMachineDefinition;
 
     public readonly context: IStateMachineContext;
 
-    constructor(stateMachineDef: StateMachineDefinition, activityBroker: ActivityBroker, context: IStateMachineContext) {
+    constructor(stateMachineDef: StateMachineDefinition, context: IStateMachineContext) {
         this.stateMachineDef = stateMachineDef;
-        this.activityBroker = activityBroker;
         this.context = context;
     }
 
@@ -20,11 +17,6 @@ export class StateMachine {
      * Set the exec_status to 'RUNNING' so it will take events. If current state is undefined, start from the init state.
      */
     public async run() {
-        const instanceId = await this.context.contextId;
-        if (instanceId === undefined) {
-            throw new Error(`invalid context, instanceId not available`);
-        }
-
         await this.context.setExecStatus(EXEC_STATUS.RUNNING);
 
         const stateId = await this.context.getStateId();
@@ -47,6 +39,10 @@ export class StateMachine {
         await this.transitToState(undefined);
         await this.context.reset();
         await this.context.setExecStatus(EXEC_STATUS.STOPPED);
+    }
+
+    public async destroy() {
+        await this.context.destroy();
     }
 
     public async processEvent(event: IEvent): Promise<boolean> {
@@ -84,7 +80,7 @@ export class StateMachine {
         if (currStateId !== undefined) {
             const stateDef = this.stateMachineDef.getStateDefinition(currStateId);
             if (stateDef.exitActivity) {
-                await this.activityBroker.executeActivity(stateDef.exitActivity, this.context, event);
+                await ActivityBroker.instance.executeActivity(stateDef.exitActivity, this.context, event);
             }
         }
 
@@ -93,7 +89,7 @@ export class StateMachine {
         if (stateId !== undefined) {
             const stateDef = this.stateMachineDef.getStateDefinition(stateId);
             if (stateDef.entryActivity) {
-                return await this.activityBroker.executeActivity(stateDef.entryActivity, this.context, event);
+                return await ActivityBroker.instance.executeActivity(stateDef.entryActivity, this.context, event);
             }
         }
     }

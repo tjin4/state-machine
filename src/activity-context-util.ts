@@ -1,14 +1,6 @@
-import { IActivity, IActivityContext, IActivityManifest, IActivityPropertyManifest, IEvent, IStateContext, IStateMachineContext } from "./types";
-import { Context } from './context';
-import { v4 as uuidv4 } from 'uuid';
+import { CONTEXT_TYPE, IActivity, IActivityContext, IActivityManifest, IActivityPropertyManifest, IEvent, IStateContext, IStateMachineContext } from "./types";
 
 export class ActivityContextUtil {
-
-    static async createActivityContext(): Promise<IActivityContext> {
-        const activityContextId = `activity:uuidv4()`;
-        const activityContext = await Context.createContext(activityContextId);
-        return activityContext;
-    }
 
     static async evalInputProperties(activity: IActivity, activityManifest: IActivityManifest, activityContext: IActivityContext, stateMachineContext: IStateMachineContext, event?: IEvent): Promise<void> {
         //validate activity.inputPropertiesExpressionEvalMode
@@ -86,7 +78,7 @@ export class ActivityContextUtil {
     }
 
     private static evalSyncInputPropertyExpression(expression: string, state: IStateMachineContext | Record<string, any>, local: IStateContext | Record<string, any>, event?: IEvent): any {
-        // example expression: "{host: state['id'], port: local.port, uri: event.properties['uri']}"
+        // example expression: "{host: state['host'], port: local.port, uri: event.properties['uri']}"
         // example expression: "`https://${state.host}:${local.port}/${local.uri)}`"
 
         const expressionWrap = `{return (${expression})}`;

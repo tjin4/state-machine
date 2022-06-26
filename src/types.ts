@@ -10,22 +10,42 @@ export enum EXEC_STATUS {
     STOPPED = 'STOPPED'
 }
 
+export enum CONTEXT_TYPE {
+    STATE_MACHINE = 'state-machine',
+    STATE_LOCAL = 'state-local',
+    ACTIVITY = 'activity'
+}
+
+export interface IContextManager {
+
+    getContexts(contextType: CONTEXT_TYPE): Promise<IContext[]>;
+
+    getContext(contextId: string): Promise<IContext | null>;
+
+    createContext(contextId: string | undefined, contextType: CONTEXT_TYPE, description: string, initReadOnlyProps?: Record<string, any>): Promise<IContext>;
+
+    deleteContext(contextId: string): Promise<number>;
+}
+
 export interface IContext {
     readonly contextId: string;
+    readonly contextType: CONTEXT_TYPE;
+    readonly description: string;
+
+    init(initReadOnlyProps: Record<string, any>): Promise<void>;
 
     getProperties(): Promise<Record<string, any>>;
 
     get(name: string): Promise<any>;
     set(name: string, value: any): Promise<void>;
 
-    /**
-     * persist dirty properities in getProperties() dictionary
-     */
-    flush(): Promise<void>;
-
     reset(): Promise<void>;
 
     destroy(): Promise<void>;
+}
+
+export interface IActivityContext extends IContext {
+    readonly activityId: string;
 }
 
 /**
@@ -115,10 +135,6 @@ export interface IStateMachineDefinition {
     states: Record<string, IStateDefinition>;
     stateTransitions: Record<string, Record<string, string>>;
 }
-
-export type IActivityContext = IContext;
-// export interface IActivityContext extends IContext {
-// }
 
 export interface IActivityPropertyManifest {
     name: string;

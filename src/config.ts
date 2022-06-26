@@ -9,10 +9,17 @@ export interface IPgConfig {
     database: string
 }
 
+export interface ITestConfig {
+    skip_destroy_context: boolean
+}
+
 export interface IConfigData {
     PersistContext: boolean;
     //DBConnectionString: string;
     PgConfig: IPgConfig;
+
+    TestConfig: ITestConfig;
+
 }
 
 class Config {
@@ -37,6 +44,9 @@ class Config {
                 host: this.getEnvVariable('PGHOST', true),
                 port: JSON.parse(this.getEnvVariable('PGPORT', true)),
                 database: this.getEnvVariable('PGDATABASE', true)
+            },
+            TestConfig: {
+                skip_destroy_context: JSON.parse(this.getEnvVariable('TEST.skip_destoy_context', false, 'false'))
             }
         };
     }

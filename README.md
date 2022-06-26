@@ -1,8 +1,33 @@
 # state-machine
 a node js state machine implementation
 
+## Quick Start
+
+### Setup Dev Environment
+- node js
+- VS code
+- Docker desktop
+
+### Run test
+
+```
+//
+npm install
+
+//
+npm run restart-db
+
+//
+npm run build
+
+//
+npm run test
+
+```
+
+
 ---
-## state machine model
+## State Machine model
 
 A workflow engine is a special use case of state machine.
 
@@ -25,7 +50,7 @@ A transient state is a state with entry-activity that returns a event, which wil
 
 
 ---
-## activity 
+## Activity model
 
 ### activity provider and manifest
 
@@ -39,7 +64,7 @@ A transient state is a state with entry-activity that returns a event, which wil
 ### event broker
 
 ---
-## contexts
+## Contexts
 
 ### state machine context
 
@@ -58,6 +83,70 @@ A transient state is a state with entry-activity that returns a event, which wil
 - activity output properties expressions will be evaluated and set to the state machine context or state local context
 
 ### persistent context
+
+
+## Examples
+
+```javascript
+{
+    "$schema": "urn:x-bloomberg-com:app-portal:state-machine-definition-dictionary",
+    "definitionId": "a-sample-statemachine-definition",
+    "description": "",
+    "initStateId": "state1",
+    "states": {
+        "state1": {
+            "stateId": "state1",
+            "descption": "listen ib",
+            "entryActivity": {
+                "activityId": "123456-1",
+                "name": "listen-ib",
+                "config": {
+                    "room-id": "my room"
+                }
+            }
+        },
+        "state2": {
+            "stateId": "state2",
+            "descption": "a transient state",
+            "entryActivity": {
+                "activityId": "test-activity:return-event",
+                "name": "return event2",
+                "inputPropertiesExpressionEvalMode": "async", 
+                "inputPropertiesExpression": {
+                    "event": "{'eventId': 'event-from-entry-activity', 'properties': { 'info': `${await state.get('stateId')}  ${event.eventId}`} }"
+                },
+                "outputPropertiesExpression": {
+                    "output-prop1": "state['output-from-test-activity']"
+                }
+            }
+        },
+        "state3": {
+            "stateId": "state3",
+            "descption": "check citi bike",
+            "entryActivity": {
+                "activityId": "123456-2",
+                "name": "http get",
+                "config": {
+                    "url": "https://www.citi-bike.com"
+                }
+            }
+        }
+    },
+    "stateTransitions": {
+        "state1": {
+            "event1": "state2",
+            "event2": "state3"
+        },
+        "state2": {
+            "event1": "state1",
+            "event-from-entry-activity": "state3"
+        },
+        "state3": {
+            "event3": "state1"
+        }
+    }
+}
+```
 
 
 ## TODO
