@@ -4,6 +4,8 @@ import { ContextManager } from "./context-manager";
 
 export class ActivityBroker implements IActivityBroker {
 
+    static readonly instance: ActivityBroker = new ActivityBroker();
+
     private activityProviders: Record<string, IActivityProvider> = {};
     private activityManifests: Record<string, IActivityManifest> = {};
 

@@ -4,15 +4,12 @@ import { ActivityBroker } from './activity-broker';
 
 export class StateMachine {
 
-    private activityBroker: ActivityBroker;
-
     private stateMachineDef: StateMachineDefinition;
 
     public readonly context: IStateMachineContext;
 
-    constructor(stateMachineDef: StateMachineDefinition, activityBroker: ActivityBroker, context: IStateMachineContext) {
+    constructor(stateMachineDef: StateMachineDefinition, context: IStateMachineContext) {
         this.stateMachineDef = stateMachineDef;
-        this.activityBroker = activityBroker;
         this.context = context;
     }
 
@@ -83,7 +80,7 @@ export class StateMachine {
         if (currStateId !== undefined) {
             const stateDef = this.stateMachineDef.getStateDefinition(currStateId);
             if (stateDef.exitActivity) {
-                await this.activityBroker.executeActivity(stateDef.exitActivity, this.context, event);
+                await ActivityBroker.instance.executeActivity(stateDef.exitActivity, this.context, event);
             }
         }
 
@@ -92,7 +89,7 @@ export class StateMachine {
         if (stateId !== undefined) {
             const stateDef = this.stateMachineDef.getStateDefinition(stateId);
             if (stateDef.entryActivity) {
-                return await this.activityBroker.executeActivity(stateDef.entryActivity, this.context, event);
+                return await ActivityBroker.instance.executeActivity(stateDef.entryActivity, this.context, event);
             }
         }
     }

@@ -7,11 +7,13 @@ import { StateMachine } from '../src/state-machine';
 import { EXEC_STATUS } from '../src/types';
 import { PgPool } from '../src/db/pg-pool';
 import { StateMachineDefinitionRegistry } from '../src/state-machine-definition-registry';
+import { ActivityBroker } from '../src/activity-broker';
 
 describe('StateMachineEngin Tests', ()=>{
 
     beforeAll(async ()=>{
-        
+
+      
     })
 
     afterAll(async ()=>{
@@ -23,13 +25,13 @@ describe('StateMachineEngin Tests', ()=>{
     })
     
     test('StateMachineEngine.run', async () => {
+        ActivityBroker.instance.register(new TestActivityProvider());
 
         const docString = readFileSync(path.join(__dirname, 'sample-state-machine-def-dict-doc.json')).toString();
         const def = StateMachineDefinition.loadFromString(docString);
         await StateMachineDefinitionRegistry.instance.register(def);
-
+        
         const engine = new StateMachineEngine();
-        engine.broker.register(new TestActivityProvider());
     
         const stateMachine = await engine.createStateMachine(def.getDefinitionId(), {user: 'tao'}, true);
         const stateMachineContextId = stateMachine.context.contextId;

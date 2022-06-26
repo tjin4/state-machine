@@ -7,10 +7,8 @@ import { StateMachineDefinitionRegistry } from "./state-machine-definition-regis
 
 export class StateMachineEngine {
 
-    broker: ActivityBroker;
 
     constructor() {
-        this.broker = new ActivityBroker();
     }
 
     async createStateMachine(stateMachineDefId: string, startupArgs: any, autoStart: boolean): Promise<StateMachine> {
@@ -22,7 +20,7 @@ export class StateMachineEngine {
 
         const context = await ContextManager.instance.createStateMachineContext(def.getDefinitionId());
         await context.set('startupArgs', startupArgs);
-        const stateMachine = new StateMachine(def, this.broker, context);
+        const stateMachine = new StateMachine(def, context);
 
         if (autoStart) {
             await stateMachine.run();
@@ -42,7 +40,7 @@ export class StateMachineEngine {
             throw new Error(`stateMachineDefId '${context.stateMachineDefId}' is not registered`);
         }
 
-        const stateMachine = new StateMachine(def, this.broker, context);
+        const stateMachine = new StateMachine(def, context);
         return stateMachine;
     }
 
