@@ -14,7 +14,7 @@ export class PgContextManager implements IContextManager {
         const result = await PgPool.getInstance().executeQuey(query);
         for (let i = 0; i < result.rowCount; i++) {
             const row = result.rows[i];
-            const context = new PgContext(row[0], row[1], row[2]);
+            const context = new PgContext(row['context_id'], row['context_type'], row['description']);
             contexts.push(context);
         }
 
@@ -28,7 +28,7 @@ export class PgContextManager implements IContextManager {
         const result = await PgPool.getInstance().executeQuey(query);
         if (result.rowCount === 1) {
             const row = result.rows[0];
-            context = new PgContext(row[0], row[1], row[2]);
+            context = new PgContext(row['context_id'], row['context_type'], row['description']);
         }
 
         return context;
@@ -96,7 +96,7 @@ class PgContext implements IContext {
         const result = await PgPool.getInstance().executeQuey(query);
         if (result.rowCount === 1) {
             const row = result.rows[0];
-            const property_value = row.property_value;
+            const property_value = row['property_value'];
             try {
                 const obj = JSON.parse(property_value);
                 return obj;
