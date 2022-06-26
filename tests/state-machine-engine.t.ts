@@ -23,14 +23,20 @@ describe('StateMachineEngin Tests', ()=>{
     beforeEach(async ()=>{
         
     })
+
+    test('StateMachineEngine.list', async ()=>{
+        const engine = new StateMachineEngine();
+        const list = await engine.listStateMachineIds();
+        console.log(JSON.stringify(list));
+    })
     
-    test('StateMachineEngine.run', async () => {
+    test.skip('StateMachineEngine.run', async () => {
         ActivityBroker.instance.register(new TestActivityProvider());
 
         const docString = readFileSync(path.join(__dirname, 'sample-state-machine-def-dict-doc.json')).toString();
         const def = StateMachineDefinition.loadFromString(docString);
         await StateMachineDefinitionRegistry.instance.register(def);
-        
+
         const engine = new StateMachineEngine();
     
         const stateMachine = await engine.createStateMachine(def.getDefinitionId(), {user: 'tao'}, true);

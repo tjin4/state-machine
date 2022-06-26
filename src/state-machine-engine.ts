@@ -1,4 +1,4 @@
-import { IEvent, IStateMachineContext } from "./types";
+import { CONTEXT_TYPE, IEvent, IStateMachineContext } from "./types";
 import { StateMachineDefinition } from "./state-machine-definition";
 import { StateMachine } from "./state-machine";
 import { ActivityBroker } from "./activity-broker";
@@ -7,8 +7,9 @@ import { StateMachineDefinitionRegistry } from "./state-machine-definition-regis
 
 export class StateMachineEngine {
 
-
-    constructor() {
+    async listStateMachineIds(): Promise<string[]> {
+        const contexts = await ContextManager.instance.getContexts(CONTEXT_TYPE.STATE_MACHINE);
+        return contexts.map((context)=>{return context.contextId});
     }
 
     async createStateMachine(stateMachineDefId: string, startupArgs: any, autoStart: boolean): Promise<StateMachine> {
