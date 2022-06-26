@@ -3,11 +3,10 @@ import { StateMachineDefinition } from '../src/state-machine-definition';
 import { readFileSync } from 'fs';
 import path from 'path';
 
-describe.skip('StateMachineDefinition Tests', ()=>{
+describe('StateMachineDefinition Tests', ()=>{
     test('StateMachineDefinition.load', async () => {
         const doc = readFileSync(path.join(__dirname, 'sample-state-machine-def-dict-doc.json')).toString();
-        let def = new StateMachineDefinition();
-        def.load(doc);
+        let def = StateMachineDefinition.loadFromString(doc);
         console.log(`defId=${def.getDefinitionId()}, initState=${def.getInitStateId()}`);
         
         const state1Def = def.getStateDefinition('state1');

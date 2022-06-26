@@ -1,30 +1,28 @@
-import { IEvent } from "./types";
+import { IEvent, IStateMachineContext } from "./types";
 import { StateMachineDefinition } from "./state-machine-definition";
 import { StateMachine } from "./state-machine";
 import { ActivityBroker } from "./activity-broker";
 import { ContextManager } from "./context-manager";
+import { StateMachineDefinitionRegistry } from "./state-machine-definition-registry";
 
 export class StateMachineEngine {
 
     broker: ActivityBroker;
-    private stateMachines: Record<string, StateMachine> = {};
 
     constructor() {
         this.broker = new ActivityBroker();
     }
 
-    async createStateMachine(stateMachineDefDoc: string, startupArgs: any, autoStart: boolean): Promise<StateMachine> {
+    async createStateMachine(stateMachineDefId: string, startupArgs: any, autoStart: boolean): Promise<StateMachine> {
 
-        const def = new StateMachineDefinition();
-        def.load(stateMachineDefDoc);
-        if (!def.doc) {
-            throw new Error('StateMachineDefinition is invalid');
+        const def = await StateMachineDefinitionRegistry.instance.find(stateMachineDefId);
+        if(!def){
+            throw new Error(`stateMachineDefId '${stateMachineDefId}' is not registered`);
         }
 
-        const context = await ContextManager.instance.createStateMachineContext(def.doc.definitionId);
+        const context = await ContextManager.instance.createStateMachineContext(def.getDefinitionId());
         await context.set('startupArgs', startupArgs);
         const stateMachine = new StateMachine(def, this.broker, context);
-        this.stateMachines[context.contextId] = stateMachine;
 
         if (autoStart) {
             await stateMachine.run();
@@ -33,32 +31,39 @@ export class StateMachineEngine {
         return stateMachine;
     }
 
-    findStateMachine(contextId: string): StateMachine | undefined {
-        return this.stateMachines[contextId];
-    }
-
-    async runStateMachine(contextId: string) {
-        await this.findStateMachine(contextId)?.run();
-    }
-
-    async pauseStateMachine(contextId: string) {
-        await this.findStateMachine(contextId)?.pause();
-    }
-
-    async stopStateMachine(contextId: string) {
-        await this.findStateMachine(contextId)?.stop();
-    }
-
-    async removeStateMachine(contextId: string) {
-        const stateMachine = this.stateMachines[contextId];
-        if(stateMachine){
-            delete this.stateMachines[contextId];
-            await stateMachine.context.destroy();
+    async findStateMachine(contextId: string): Promise<StateMachine | null> {
+        const context = await ContextManager.instance.getContext(contextId) as IStateMachineContext;
+        if (!context) {
+            return null;
         }
+        
+        const def = await StateMachineDefinitionRegistry.instance.find(context.stateMachineDefId);
+        if(!def){
+            throw new Error(`stateMachineDefId '${context.stateMachineDefId}' is not registered`);
+        }
+
+        const stateMachine = new StateMachine(def, this.broker, context);
+        return stateMachine;
+    }
+
+    async runStateMachine(contextId: string): Promise<void> {
+        await (await this.findStateMachine(contextId))?.run();
+    }
+
+    async pauseStateMachine(contextId: string): Promise<void> {
+        await (await this.findStateMachine(contextId))?.pause();
+    }
+
+    async stopStateMachine(contextId: string): Promise<void> {
+        await (await this.findStateMachine(contextId))?.stop();
+    }
+
+    async removeStateMachine(contextId: string): Promise<void> {
+        await ContextManager.instance.deleteContext(contextId);
     }
 
     async dispatchEvent(event: IEvent): Promise<boolean | undefined> {
-        return await this.findStateMachine(event.stateMachineId)?.processEvent(event);
+        return await (await this.findStateMachine(event.stateMachineId))?.processEvent(event);
     }
 
 }

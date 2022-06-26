@@ -2,7 +2,7 @@ import { PgContextManager } from '../src/db/pg-context';
 import { PgPool } from '../src/db/pg-pool';
 import { CONTEXT_TYPE } from '../src/types';
 
-describe.skip('Context test', () => {
+describe('Context test', () => {
 
     beforeAll(async () => {
     })

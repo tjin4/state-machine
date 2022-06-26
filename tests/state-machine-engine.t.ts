@@ -1,24 +1,37 @@
 import { StateMachineEngine } from '../src/state-machine-engine';
 import { TestActivityProvider } from './test-activity-provider';
+import { StateMachineDefinition } from '../src/state-machine-definition';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { StateMachine } from '../src/state-machine';
 import { EXEC_STATUS } from '../src/types';
 import { PgPool } from '../src/db/pg-pool';
+import { StateMachineDefinitionRegistry } from '../src/state-machine-definition-registry';
 
-describe.skip('StateMachineEngin Tests', ()=>{
+describe('StateMachineEngin Tests', ()=>{
+
+    beforeAll(async ()=>{
+        
+    })
+
     afterAll(async ()=>{
         await PgPool.destroyInstance();
     })
+
+    beforeEach(async ()=>{
+        
+    })
     
     test('StateMachineEngine.run', async () => {
-     
-        const doc = readFileSync(path.join(__dirname, 'sample-state-machine-def-dict-doc.json')).toString();
-    
+
+        const docString = readFileSync(path.join(__dirname, 'sample-state-machine-def-dict-doc.json')).toString();
+        const def = StateMachineDefinition.loadFromString(docString);
+        await StateMachineDefinitionRegistry.instance.register(def);
+
         const engine = new StateMachineEngine();
         engine.broker.register(new TestActivityProvider());
     
-        const stateMachine = await engine.createStateMachine(doc, {user: 'tao'}, true);
+        const stateMachine = await engine.createStateMachine(def.getDefinitionId(), {user: 'tao'}, true);
     
         for (let i = 0; i < 1; i++) {
             await engine.runStateMachine(stateMachine.context.contextId);

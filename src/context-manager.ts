@@ -14,17 +14,26 @@ export class ContextManager implements IContextManager {
     };
 
     async getContexts(contextType: CONTEXT_TYPE): Promise<IContext[]> {
-        if(config.PersistContext){
-            return await PgContextManager.instance.getContexts(contextType);
+        if (config.PersistContext) {
+            const baseContexts = await PgContextManager.instance.getContexts(contextType);
+            const contexts = Promise.all(baseContexts.map(async (baseContext) => { return await this.createContextFromBase(baseContext, baseContext.contextType, {});}));
+            return contexts;
         }
+
+        //
         return Object.values(this.contexts[contextType]);
     }
 
     async getContext(contextId: string): Promise<IContext | null> {
-        if(config.PersistContext){
-            return await PgContextManager.instance.getContext(contextId);
+        if (config.PersistContext) {
+            const baseContext = await PgContextManager.instance.getContext(contextId);
+            if (!baseContext) {
+                return null;
+            }
+            return this.createContextFromBase(baseContext, baseContext.contextType, {});
         }
 
+        //
         if (this.contexts['state-machine'][contextId] !== undefined) {
             return this.contexts['state-machine'][contextId];
         }
@@ -51,19 +60,28 @@ export class ContextManager implements IContextManager {
             baseContext.init(initReadOnlyProps);
         }
 
+        return await this.createContextFromBase(baseContext, contextType, initReadOnlyProps);
+    }
+
+    private async createContextFromBase(baseContext: IContext, contextType: CONTEXT_TYPE, initReadOnlyProps: Record<string, any>): Promise<IContext> {
+
         switch (contextType) {
             case CONTEXT_TYPE.ACTIVITY: {
-                const context = new ActivityContext(baseContext, initReadOnlyProps['activityId']);
+                const activityId = initReadOnlyProps['activityId'] ?? await baseContext.get('activityId');
+                const context = new ActivityContext(baseContext, activityId);
                 this.contexts[contextType][context.contextId] = context;
                 return context;
             }
             case CONTEXT_TYPE.STATE_LOCAL: {
-                const context = new StateContext(baseContext, initReadOnlyProps['stateMachineContextId'], initReadOnlyProps['stateId']);
+                const stateMachineContextId = initReadOnlyProps['stateMachineContextId'] ?? await baseContext.get('stateMachineContextId');
+                const stateId = initReadOnlyProps['stateId'] ?? await baseContext.get('stateId');
+                const context = new StateContext(baseContext, stateMachineContextId, stateId);
                 this.contexts[contextType][context.contextId] = context;
                 return context;
             }
             case CONTEXT_TYPE.STATE_MACHINE: {
-                const context = new StateMachineContext(baseContext, initReadOnlyProps['stateMachineDefId']);
+                const stateMachineDefId = initReadOnlyProps['stateMachineDefId'] ?? await baseContext.get('stateMachineDefId');
+                const context = new StateMachineContext(baseContext, stateMachineDefId);
                 this.contexts[contextType][context.contextId] = context;
                 return context;
             }
