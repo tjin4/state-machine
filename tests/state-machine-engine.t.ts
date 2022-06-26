@@ -30,7 +30,7 @@ describe('StateMachineEngin Tests', ()=>{
         console.log(JSON.stringify(list));
     })
     
-    test.skip('StateMachineEngine.run', async () => {
+    test('StateMachineEngine.run', async () => {
         ActivityBroker.instance.register(new TestActivityProvider());
 
         const docString = readFileSync(path.join(__dirname, 'sample-state-machine-def-dict-doc.json')).toString();
