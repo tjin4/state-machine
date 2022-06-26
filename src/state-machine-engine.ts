@@ -59,7 +59,7 @@ export class StateMachineEngine {
     }
 
     async removeStateMachine(contextId: string): Promise<void> {
-        await ContextManager.instance.deleteContext(contextId);
+        await (await this.findStateMachine(contextId))?.destroy();
     }
 
     async dispatchEvent(event: IEvent): Promise<boolean | undefined> {

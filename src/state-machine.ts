@@ -20,11 +20,6 @@ export class StateMachine {
      * Set the exec_status to 'RUNNING' so it will take events. If current state is undefined, start from the init state.
      */
     public async run() {
-        const instanceId = await this.context.contextId;
-        if (instanceId === undefined) {
-            throw new Error(`invalid context, instanceId not available`);
-        }
-
         await this.context.setExecStatus(EXEC_STATUS.RUNNING);
 
         const stateId = await this.context.getStateId();
@@ -47,6 +42,10 @@ export class StateMachine {
         await this.transitToState(undefined);
         await this.context.reset();
         await this.context.setExecStatus(EXEC_STATUS.STOPPED);
+    }
+
+    public async destroy() {
+        await this.context.destroy();
     }
 
     public async processEvent(event: IEvent): Promise<boolean> {

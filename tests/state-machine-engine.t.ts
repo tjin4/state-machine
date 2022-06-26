@@ -32,22 +32,27 @@ describe('StateMachineEngin Tests', ()=>{
         engine.broker.register(new TestActivityProvider());
     
         const stateMachine = await engine.createStateMachine(def.getDefinitionId(), {user: 'tao'}, true);
+        const stateMachineContextId = stateMachine.context.contextId;
     
         for (let i = 0; i < 1; i++) {
-            await engine.runStateMachine(stateMachine.context.contextId);
-            console.log(JSON.stringify(stateMachine.context, null, 2));
+            await engine.runStateMachine(stateMachineContextId);
             expect(await stateMachine.context.getExecStatus()).toEqual(EXEC_STATUS.RUNNING);
             expect(await stateMachine.context.getStateId()).toEqual('state1');
     
-            await engine.dispatchEvent({ eventId: 'event1', stateMachineId:stateMachine.context.contextId, properties: {} });
-            console.log(JSON.stringify(stateMachine.context, null, 2));
+            await engine.dispatchEvent({ eventId: 'event1', stateMachineId:stateMachineContextId, properties: {} });
+            expect(await stateMachine.context.getExecStatus()).toEqual(EXEC_STATUS.RUNNING);
+            expect(await stateMachine.context.getStateId()).toEqual('state3');
     
-            await engine.dispatchEvent({ eventId: 'event3', stateMachineId:stateMachine.context.contextId, properties: {} });
-            console.log(JSON.stringify(stateMachine.context, null, 2));
-    
-            await engine.pauseStateMachine(stateMachine.context.contextId);
-            console.log(JSON.stringify(stateMachine.context, null, 2));
+            await engine.dispatchEvent({ eventId: 'event3', stateMachineId:stateMachineContextId, properties: {} });
+            expect(await stateMachine.context.getExecStatus()).toEqual(EXEC_STATUS.RUNNING);
+            expect(await stateMachine.context.getStateId()).toEqual('state1');
+
+            
+            await engine.pauseStateMachine(stateMachineContextId);
+            expect(await stateMachine.context.getExecStatus()).toEqual(EXEC_STATUS.PAUSED);
+            expect(await stateMachine.context.getStateId()).toEqual('state1');
+
         }
-        await engine.removeStateMachine(stateMachine.context.contextId);
+        await engine.removeStateMachine(stateMachineContextId);
     });
 })

@@ -16,7 +16,7 @@ export class ContextManager implements IContextManager {
     async getContexts(contextType: CONTEXT_TYPE): Promise<IContext[]> {
         if (config.PersistContext) {
             const baseContexts = await PgContextManager.instance.getContexts(contextType);
-            const contexts = Promise.all(baseContexts.map(async (baseContext) => { return await this.createContextFromBase(baseContext, baseContext.contextType, {});}));
+            const contexts = Promise.all(baseContexts.map(async (baseContext) => { return await this.createContextFromBase(baseContext, baseContext.contextType, {}); }));
             return contexts;
         }
 
@@ -82,6 +82,7 @@ export class ContextManager implements IContextManager {
             case CONTEXT_TYPE.STATE_MACHINE: {
                 const stateMachineDefId = initReadOnlyProps['stateMachineDefId'] ?? await baseContext.get('stateMachineDefId');
                 const context = new StateMachineContext(baseContext, stateMachineDefId);
+                await context.initLoadCurrentStateContext();
                 this.contexts[contextType][context.contextId] = context;
                 return context;
             }
@@ -281,6 +282,21 @@ class StateMachineContext implements IStateMachineContext {
         this.stateMachineDefId = stateMachineDefId;
     }
 
+    async initLoadCurrentStateContext(): Promise<void> {
+        const stateContextId = await this.get('stateContextId') as string;
+        if (!stateContextId) {
+            return;
+        }
+        const stateContext = await ContextManager.instance.getContext(stateContextId);
+        if (!stateContext) {
+            return;
+        }
+        if(stateContext.contextType !== CONTEXT_TYPE.STATE_LOCAL) {
+            throw new Error ('Internal error, expecting state-local context type');
+        }
+        this.stateContext = stateContext as IStateContext;
+    }
+
     async init(initReadOnlyProps: Record<string, any>): Promise<void> {
         await this.baseContext.init(initReadOnlyProps);
     }
@@ -302,7 +318,8 @@ class StateMachineContext implements IStateMachineContext {
     }
 
     async getStateId(): Promise<string | undefined> {
-        return await this.get('stateId');
+        this._stateId = await this.get('stateId');
+        return this._stateId;
     }
 
     async setStateId(stateId?: string): Promise<void> {
@@ -329,7 +346,7 @@ class StateMachineContext implements IStateMachineContext {
 
     async destroy(): Promise<void> {
         if (this.stateContext) {
-            this.stateContext.destroy();
+            await this.stateContext.destroy();
             this.stateContext = undefined;
         }
         await this.baseContext.destroy();
@@ -337,11 +354,13 @@ class StateMachineContext implements IStateMachineContext {
 
     private async setStateContext(stateId?: string): Promise<IStateContext | undefined> {
         if (this.stateContext) {
-            this.stateContext.destroy();
+            await this.set('stateContextId', undefined);
+            await this.stateContext.destroy();
             this.stateContext = undefined;
         }
         if (stateId) {
             this.stateContext = await ContextManager.instance.createStateContext(this.contextId, stateId);
+            await this.set('stateContextId', this.stateContext.contextId)
             return this.stateContext;
         }
     }
