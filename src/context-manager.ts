@@ -7,14 +7,34 @@ export class ContextManager implements IContextManager {
 
     static readonly instance: ContextManager = new ContextManager();
 
-    private contexts: Record<string, IContext> = {};
+    private contexts: Record<CONTEXT_TYPE, Record<string, IContext>> = {
+        'activity': {},
+        'state-local': {},
+        'state-machine': {}
+    };
 
-    getContexts(contextType: CONTEXT_TYPE): Promise<IContext[]> {
-        throw new Error("Method not implemented.");
+    async getContexts(contextType: CONTEXT_TYPE): Promise<IContext[]> {
+        if(config.PersistContext){
+            return await PgContextManager.instance.getContexts(contextType);
+        }
+        return Object.values(this.contexts[contextType]);
     }
 
     async getContext(contextId: string): Promise<IContext | null> {
-        throw new Error("Method not implemented.");
+        if(config.PersistContext){
+            return await PgContextManager.instance.getContext(contextId);
+        }
+
+        if (this.contexts['state-machine'][contextId] !== undefined) {
+            return this.contexts['state-machine'][contextId];
+        }
+        else if (this.contexts['state-local'][contextId] !== undefined) {
+            return this.contexts['state-local'][contextId];
+        }
+        else if (this.contexts['activity'][contextId] !== undefined) {
+            return this.contexts['activity'][contextId];
+        }
+        return null;
     }
 
     async createContext(contextId: string | undefined, contextType: CONTEXT_TYPE, description: string, initReadOnlyProps: Record<string, any>): Promise<IContext> {
@@ -33,43 +53,58 @@ export class ContextManager implements IContextManager {
 
         switch (contextType) {
             case CONTEXT_TYPE.ACTIVITY: {
-                return new ActivityContext(baseContext, initReadOnlyProps['activityId']);
+                const context = new ActivityContext(baseContext, initReadOnlyProps['activityId']);
+                this.contexts[contextType][context.contextId] = context;
+                return context;
             }
             case CONTEXT_TYPE.STATE_LOCAL: {
-                return new StateContext(baseContext, initReadOnlyProps['stateMachineContextId'], initReadOnlyProps['stateId']);
+                const context = new StateContext(baseContext, initReadOnlyProps['stateMachineContextId'], initReadOnlyProps['stateId']);
+                this.contexts[contextType][context.contextId] = context;
+                return context;
             }
             case CONTEXT_TYPE.STATE_MACHINE: {
-                return new StateMachineContext(baseContext, initReadOnlyProps['stateMachineDefId']);
+                const context = new StateMachineContext(baseContext, initReadOnlyProps['stateMachineDefId']);
+                this.contexts[contextType][context.contextId] = context;
+                return context;
             }
             default: {
-                return baseContext;
+                throw new Error(`context type not supported`);
             }
         }
     }
 
     async createActivityContext(activityId: string, contextId?: string): Promise<IActivityContext> {
-        return await this.createContext(contextId, CONTEXT_TYPE.ACTIVITY, '', {activityId: activityId}) as IActivityContext;
+        return await this.createContext(contextId, CONTEXT_TYPE.ACTIVITY, '', { activityId: activityId }) as IActivityContext;
     }
 
     async createStateContext(stateMachineContextId: string, stateId: string, contextId?: string): Promise<IStateContext> {
-        return await this.createContext(contextId, CONTEXT_TYPE.STATE_LOCAL, '', {stateMachineContextId, stateId}) as IStateContext;
+        return await this.createContext(contextId, CONTEXT_TYPE.STATE_LOCAL, '', { stateMachineContextId, stateId }) as IStateContext;
     }
 
     async createStateMachineContext(stateMachineDefId: string, contextId?: string): Promise<IStateMachineContext> {
-        return await this.createContext(contextId, CONTEXT_TYPE.STATE_MACHINE, '', {stateMachineDefId}) as IStateMachineContext;
+        return await this.createContext(contextId, CONTEXT_TYPE.STATE_MACHINE, '', { stateMachineDefId }) as IStateMachineContext;
     }
 
     async deleteContext(contextId: string): Promise<number> {
+        let ret = 0;
+        if (this.contexts['state-machine'][contextId] !== undefined) {
+            delete this.contexts['state-machine'][contextId];
+            ret = 1;
+        }
+        else if (this.contexts['state-local'][contextId] !== undefined) {
+            delete this.contexts['state-local'][contextId];
+            ret = 1;
+        }
+        else if (this.contexts['activity'][contextId] !== undefined) {
+            delete this.contexts['activity'][contextId];
+            ret = 1;
+        }
+
         if (config.PersistContext) {
             return await PgContextManager.instance.deleteContext(contextId);
         }
-        else {
-            if (this.contexts[contextId] !== undefined) {
-                delete this.contexts[contextId];
-                return 1;
-            }
-            return 0;
-        }
+
+        return ret;
     }
 }
 
@@ -288,7 +323,7 @@ class StateMachineContext implements IStateMachineContext {
             this.stateContext = undefined;
         }
         if (stateId) {
-            this.stateContext = await ContextManager.instance.createStateContext(this.contextId, stateId); 
+            this.stateContext = await ContextManager.instance.createStateContext(this.contextId, stateId);
             return this.stateContext;
         }
     }
