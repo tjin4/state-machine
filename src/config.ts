@@ -18,6 +18,11 @@ export interface IConfigData {
     //DBConnectionString: string;
     PgConfig: IPgConfig;
 
+    KafkaBroker: string;
+    KafkaTopic: string;
+    KafkaCreateTopic: boolean;
+    KafkaConsumerGroup: string;
+
     TestConfig: ITestConfig;
 
 }
@@ -45,6 +50,10 @@ class Config {
                 port: JSON.parse(this.getEnvVariable('PGPORT', true)),
                 database: this.getEnvVariable('PGDATABASE', true)
             },
+            KafkaBroker: this.getEnvVariable('KAFKA_BROKER', true),
+            KafkaTopic: this.getEnvVariable('KAFKA_TOPIC', true),
+            KafkaCreateTopic: JSON.parse(this.getEnvVariable('KAFKA_CREATE_TOPIC', false, 'false')),
+            KafkaConsumerGroup: this.getEnvVariable('KAFKA_CONSUMER_GROUP', true),
             TestConfig: {
                 skip_destroy_context: JSON.parse(this.getEnvVariable('TEST.skip_destoy_context', false, 'false'))
             }

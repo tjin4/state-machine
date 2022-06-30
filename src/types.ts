@@ -147,6 +147,7 @@ export interface IActivityPropertyManifest {
  */
 export interface IActivityManifest {
     activityId: string;
+    version?: string;
     name?: string;
     description?: string;
 
@@ -165,4 +166,10 @@ export interface IActivityBroker {
     register(provider: IActivityProvider): Promise<boolean>;
 
     executeActivity(activity: IActivity, stateMachineContext: IStateMachineContext, event?: IEvent): Promise<IEvent | undefined>;
+}
+
+export interface IEventBroker {
+    subscribe(): Promise<boolean>;
+
+    publish(event: IEvent): Promise<boolean>;
 }
